@@ -101,7 +101,7 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
         func runTen() {
             print("Running 10 operations...")
             for _ in 1...10 {
-                ppQProgressTest.opQ.addOperation { sleep(0.1) }
+                ppQProgressTest.opQ.addOperation { usleep(100_000) }
             }
             
             XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 10 * 100)
@@ -170,7 +170,7 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
         let completionBlockExp = expectation(description: "Operation Completion")
         
         opQ.addOperation {
-            sleep(0.1)
+            usleep(100_000)
             completionBlockExp.fulfill()
         }
         

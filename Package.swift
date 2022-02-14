@@ -28,3 +28,24 @@ let package = Package(
             dependencies: ["OTOperations"])
     ]
 )
+
+func addShouldTestFlag() {
+    var swiftSettings = package.targets
+        .first(where: { $0.name == "OTOperationsTests" })?
+        .swiftSettings ?? []
+    
+    swiftSettings.append(.define("shouldTestCurrentPlatform"))
+    
+    package.targets
+        .first(where: { $0.name == "OTOperationsTests" })?
+        .swiftSettings = swiftSettings
+}
+
+// Swift version in Xcode 12.5.1 which introduced watchOS testing
+#if os(watchOS) && swift(>=5.4.2)
+addShouldTestFlag()
+#elseif os(watchOS)
+// don't add flag
+#else
+addShouldTestFlag()
+#endif

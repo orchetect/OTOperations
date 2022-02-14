@@ -253,7 +253,7 @@ final class Threading_AtomicBlockOperation_Tests: XCTestCase {
         
         for val in 1...100 { // will take 1 second to complete
             op.addOperation { v in
-                sleep(0.01)
+                usleep(10_000)
                 v.mutate { $0.append(val) }
             }
         }
@@ -345,7 +345,7 @@ final class Threading_AtomicBlockOperation_Tests: XCTestCase {
             for valueNum in 1...20 {
                 let ref = subOp.addInteractiveOperation { op, v in
                     if op.mainShouldAbort() { return }
-                    sleep(0.2)
+                    usleep(200_000)
                     v.mutate { value in
                         value.append(valueNum)
                     }
@@ -380,7 +380,7 @@ final class Threading_AtomicBlockOperation_Tests: XCTestCase {
         DispatchQueue.global().async {
             mainOp.start()
         }
-        sleep(0.1)
+        usleep(100_000)
         mainOp.cancel()
         
         wait(for: [completionBlockExp], timeout: 1)

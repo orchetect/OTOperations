@@ -313,7 +313,7 @@ extension AtomicBlockOperation {
     }
     
     /// Blocks the current thread until all the receiver’s queued and executing operations finish executing.
-    public func waitUntilAllOperationsAreFinished(timeout: DispatchTime? = nil) {
+    public func waitUntilAllOperationsAreFinished(timeout: TimeInterval? = nil) {
         
         if let timeout = timeout {
             operationQueue.waitUntilAllOperationsAreFinished(timeout: timeout)

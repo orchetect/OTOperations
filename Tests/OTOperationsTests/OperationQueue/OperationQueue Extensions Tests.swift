@@ -7,6 +7,7 @@
 
 import XCTest
 import OTOperations
+import OTAtomics
 
 final class Threading_OperationQueueExtensions_Success_Tests: XCTestCase {
     
@@ -24,12 +25,12 @@ final class Threading_OperationQueueExtensions_Success_Tests: XCTestCase {
         val = 0
         
         opQ.addOperation {
-            sleep(0.1)
+            usleep(100_000)
             self.val = 1
         }
         
         opQ.isSuspended = false
-        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .milliseconds(500))
+        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: 0.5)
         
         XCTAssertEqual(timeoutResult, .success)
         XCTAssertEqual(opQ.operationCount, 0)
@@ -55,12 +56,12 @@ final class Threading_OperationQueueExtensions_TimedOut_Tests: XCTestCase {
         val = 0
         
         opQ.addOperation {
-            sleep(1)
+            sleep(1) // seconds
             self.val = 1
         }
         
         opQ.isSuspended = false
-        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .milliseconds(500))
+        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: 0.5)
         
         XCTAssertEqual(timeoutResult, .timedOut)
         XCTAssertEqual(opQ.operationCount, 1)

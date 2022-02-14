@@ -12,7 +12,7 @@ extension OperationQueue {
     /// Blocks the current thread until all the receiver’s queued and executing operations finish executing. Same as calling `waitUntilAllOperationsAreFinished()` but offers a timeout duration.
     @discardableResult
     public func waitUntilAllOperationsAreFinished(
-        timeout: DispatchTime
+        timeout: TimeInterval
     ) -> DispatchTimeoutResult {
         
         let g = DispatchGroup()
@@ -24,7 +24,7 @@ extension OperationQueue {
             
         }
         
-        return g.wait(timeout: timeout)
+        return g.wait(timeout: .now() + timeout)
         
     }
     

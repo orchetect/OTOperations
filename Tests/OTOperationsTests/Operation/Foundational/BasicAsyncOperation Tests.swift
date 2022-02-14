@@ -70,7 +70,7 @@ final class Threading_BasicAsyncOperation_Tests: XCTestCase {
                     
                     self.progress.completedUnitCount = Int64(opNum)
                     
-                    sleep(0.2)
+                    usleep(200_000)
                 }
                 
                 self.completeOperation()
@@ -148,7 +148,7 @@ final class Threading_BasicAsyncOperation_Tests: XCTestCase {
         }
         
         op.start()
-        sleep(0.1)
+        usleep(100_000)
         op.cancel() // cancel the operation directly (since we are not using an OperationQueue)
         
         wait(for: [completionBlockExp], timeout: 0.5)
@@ -223,7 +223,7 @@ final class Threading_BasicAsyncOperation_Tests: XCTestCase {
         opQ.progress.totalUnitCount += 1
         // queue automatically starts the operation once it's added
         opQ.addOperation(op)
-        sleep(0.1)
+        usleep(100_000)
         opQ.cancelAllOperations() // cancel the queue, not the operation. it cancels its operations.
         
         wait(for: [completionBlockExp], timeout: 0.5)

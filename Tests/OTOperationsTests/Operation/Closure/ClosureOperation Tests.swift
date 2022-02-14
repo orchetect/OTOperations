@@ -185,7 +185,7 @@ final class Threading_ClosureOperation_Tests: XCTestCase {
         
         let op = ClosureOperation {
             self.mainCheck()
-            sleep(0.5)
+            usleep(500_000)
             val = 1
         }
         

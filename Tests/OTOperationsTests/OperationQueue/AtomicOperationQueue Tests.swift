@@ -73,7 +73,7 @@ final class Threading_AtomicOperationQueue_Tests: XCTestCase {
         
         XCTAssertEqual(opQ.status, .paused)
         
-        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .milliseconds(200))
+        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: 0.2)
         XCTAssertEqual(timeoutResult, .timedOut)
         
         XCTAssertEqual(opQ.sharedMutableValue, [])
@@ -142,7 +142,7 @@ final class Threading_AtomicOperationQueue_Tests: XCTestCase {
         // then addOperations() with all 100 operations
         opQ.addOperations(ops, waitUntilFinished: false)
         
-        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
+        let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: 1.0)
         XCTAssertEqual(timeoutResult, .success)
         
         XCTAssertEqual(opQ.sharedMutableValue.count, 100)
@@ -162,7 +162,7 @@ final class Threading_AtomicOperationQueue_Tests: XCTestCase {
                                        initialMutableValue: 0) // value doesn't matter
         
         for _ in 1...10 {
-            opQ.addInteractiveOperation { _,_ in sleep(0.1) }
+            opQ.addInteractiveOperation { _,_ in usleep(100_000) }
         }
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)

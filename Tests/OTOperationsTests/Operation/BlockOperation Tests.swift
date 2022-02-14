@@ -7,12 +7,14 @@
 
 import XCTest
 @testable import OTOperations
+import OTAtomics
 
 final class BlockOperation_Tests: XCTestCase {
     
     @OTAtomicsThreadSafe fileprivate var arr: [Int] = []
     
-    /// This does not test a feature of OTCore. Rather, it tests the behavior of Foundation's built-in `BlockOperation` object.
+    /// This does not test a feature of OTOperations.
+    /// Rather, it tests the behavior of Foundation's built-in `BlockOperation` object.
     func testBlockOperation() {
         
         let op = BlockOperation()
@@ -21,7 +23,7 @@ final class BlockOperation_Tests: XCTestCase {
         
         for val in 1...100 { // will multi-thread
             op.addExecutionBlock {
-                sleep(0.1)
+                usleep(100_000)
                 self.arr.append(val)
             }
         }

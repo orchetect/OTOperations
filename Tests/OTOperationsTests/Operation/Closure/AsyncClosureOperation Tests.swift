@@ -100,12 +100,12 @@ final class Threading_AsyncClosureOperation_Tests: XCTestCase {
         }
         
         op.start()
-        sleep(0.1)
+        usleep(100_000)
         op.cancel() // cancel the operation directly (since we are not using an OperationQueue)
         
         wait(for: [mainBlockExp, mainBlockFinishedExp, completionBlockExp], timeout: 0.5)
         
-        sleep(0.2) // give a little time for cleanup
+        usleep(200_000) // give a little time for cleanup
         
         // state
         XCTAssertFalse(op.isFinished)
@@ -197,7 +197,7 @@ final class Threading_AsyncClosureOperation_Tests: XCTestCase {
         // queue automatically starts the operation once it's added
         opQ.addOperation(op)
         
-        sleep(0.1)
+        usleep(100_000)
         opQ.cancelAllOperations() // cancel the queue, not the operation. it cancels its operations.
         
         wait(for: [mainBlockExp, completionBlockExp], timeout: 0.4)
