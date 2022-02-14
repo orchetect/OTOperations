@@ -2,9 +2,17 @@
 
 [![CI Build Status](https://github.com/orchetect/OTOperations/actions/workflows/build.yml/badge.svg)](https://github.com/orchetect/OTOperations/actions/workflows/build.yml) [![Platforms - macOS | iOS | tvOS | watchOS](https://img.shields.io/badge/platforms-macOS%20|%20iOS%20|%20tvOS%20|%20watchOS%20-lightgrey.svg?style=flat)](https://developer.apple.com/swift) [![License: MIT](http://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/orchetect/OTOperations/blob/main/LICENSE)
 
-Multi-platform Swift thread-safe atomics library.
+Useful Swift `NSOperation` (`Operation`) and `NSOperationQueue` (`OperationQueue`) subclasses.
 
-The library has full unit test coverage and is actively used in production.
+Scalable, thread-safe, and automatically fully progress-reporting for nested child operations.
+
+- Foundational
+  - `BasicOperation` and `BasicAsyncOperation`
+- Closure-based
+  - `ClosureOperation` and `AsyncClosureOperation`
+  - `InteractiveClosureOperation` and `InteractiveAsyncClosureOperation`
+- Thread-safe atomic mutability
+  - `AtomicBlockOperation`
 
 ## Installation: Swift Package Manager (SPM)
 
