@@ -106,6 +106,12 @@ open class BasicOperationQueue: OperationQueue {
         _ op: Operation
     ) {
         
+        // failsafe reset of progress to known state if queue is empty
+        if resetProgressWhenFinished, operationCount == 0 {
+            progress.completedUnitCount = 0
+            progress.totalUnitCount = 0
+        }
+        
         switch operationQueueType {
         case .serialFIFO:
             // to enforce a serial queue, we add the previous operation as a dependency to the new one if it still exists
@@ -153,6 +159,12 @@ open class BasicOperationQueue: OperationQueue {
         waitUntilFinished wait: Bool
     ) {
         guard !ops.isEmpty else { return }
+        
+        // failsafe reset of progress to known state if queue is empty
+        if resetProgressWhenFinished, operationCount == 0 {
+            progress.completedUnitCount = 0
+            progress.totalUnitCount = 0
+        }
         
         switch operationQueueType {
         case .serialFIFO:
