@@ -1,12 +1,11 @@
 //
-//  BasicOperationQueue Status.swift
+//  OperationQueueStatus.swift
 //  OTOperations • https://github.com/orchetect/OTOperations
 //
 
 #if canImport(Foundation)
 
 import Foundation
-import CloudKit
 
 /// Operation queue status.
 /// Used by `BasicOperationQueue` and its subclasses.

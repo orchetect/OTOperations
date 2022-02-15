@@ -48,6 +48,9 @@ open class BasicOperation: Operation, ProgressReporting {
     /// Progress object representing progress of the operation.
     public private(set) var progress: Progress = .discreteProgress(totalUnitCount: 1)
     
+    /// Progress weight when the operation is added to a `BasicOperationQueue` or one of its subclasses.
+    public var progressWeight: OperationQueueProgressWeight = .default()
+    
     // MARK: - KVO
     
     // adding KVO compliance

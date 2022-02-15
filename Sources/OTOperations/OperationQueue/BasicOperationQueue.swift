@@ -126,10 +126,10 @@ open class BasicOperationQueue: OperationQueue {
         
         // update progress
         if let basicOp = op as? BasicOperation {
-            progress.totalUnitCount += 100
-            // give 100 units of progress in case child progress reports fractional progress
+            let units = basicOp.progressWeight.rawValue
+            progress.totalUnitCount += units
             progress.addChild(basicOp.progress,
-                              withPendingUnitCount: 100)
+                              withPendingUnitCount: units)
         } else {
             progress.totalUnitCount += 1
         }
@@ -191,10 +191,10 @@ open class BasicOperationQueue: OperationQueue {
         // update progress
         for op in ops {
             if let basicOp = op as? BasicOperation {
-                progress.totalUnitCount += 100
-                // give 100 units of progress in case child progress reports fractional progress
+                let units = basicOp.progressWeight.rawValue
+                progress.totalUnitCount += units
                 progress.addChild(basicOp.progress,
-                                  withPendingUnitCount: 100)
+                                  withPendingUnitCount: units)
             } else {
                 progress.totalUnitCount += 1
             }

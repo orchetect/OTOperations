@@ -52,10 +52,11 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     @discardableResult
     public final func addOperation(
         dependencies: [Operation] = [],
+        weight: OperationQueueProgressWeight = .default(),
         _ block: @escaping (_ atomicValue: AtomicVariableAccess<T>) -> Void
     ) -> ClosureOperation {
         
-        let op = createOperation(block)
+        let op = createOperation(weight: weight, block)
         dependencies.forEach { op.addDependency($0) }
         addOperation(op)
         return op
@@ -69,11 +70,12 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     @discardableResult
     public final func addInteractiveOperation(
         dependencies: [Operation] = [],
+        weight: OperationQueueProgressWeight = .default(),
         _ block: @escaping (_ operation: InteractiveClosureOperation,
                             _ atomicValue: AtomicVariableAccess<T>) -> Void
     ) -> InteractiveClosureOperation {
         
-        let op = createInteractiveOperation(block)
+        let op = createInteractiveOperation(weight: weight, block)
         dependencies.forEach { op.addDependency($0) }
         addOperation(op)
         return op
@@ -101,14 +103,17 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     /// Internal for debugging:
     /// Create an operation block operating on the shared mutable value.
     internal final func createOperation(
+        weight: OperationQueueProgressWeight = .default(),
         _ block: @escaping (_ atomicValue: AtomicVariableAccess<T>) -> Void
     ) -> ClosureOperation {
         
-        ClosureOperation { [weak self] in
+        let op = ClosureOperation { [weak self] in
             guard let self = self else { return }
             let varAccess = AtomicVariableAccess(operationQueue: self)
             block(varAccess)
         }
+        op.progressWeight = weight
+        return op
         
     }
     
@@ -116,15 +121,18 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     /// Create an operation block operating on the shared mutable value.
     /// `operation.mainShouldAbort()` can be periodically called and then early return if the operation may take more than a few seconds.
     internal final func createInteractiveOperation(
+        weight: OperationQueueProgressWeight = .default(),
         _ block: @escaping (_ operation: InteractiveClosureOperation,
                             _ atomicValue: AtomicVariableAccess<T>) -> Void
     ) -> InteractiveClosureOperation {
         
-        InteractiveClosureOperation { [weak self] operation in
+        let op = InteractiveClosureOperation { [weak self] operation in
             guard let self = self else { return }
             let varAccess = AtomicVariableAccess(operationQueue: self)
             block(operation, varAccess)
         }
+        op.progressWeight = weight
+        return op
         
     }
     
