@@ -178,7 +178,7 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
             runTen()
             runExp.fulfill()
         }
-        wait(for: [runExp], timeout: 5.0)
+        wait(for: [runExp], timeout: 10.0)
         
         XCTAssertEqual(ppQProgressTest.statuses, [
             .idle,
