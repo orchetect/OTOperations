@@ -286,12 +286,18 @@ open class BasicOperationQueue: OperationQueue {
     
     /// Only call as a result of the queue emptying
     private func setStatusIdle(resetProgress: Bool) {
-        if resetProgress,
-           progress.totalUnitCount != 0,
-           progress.completedUnitCount != 0
-        {
-            progress.totalUnitCount = 0
-            progress.completedUnitCount = 0
+        // enact progress reset on a delay in case
+        // more operations are added soon after the queue empties
+        if resetProgress {
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                guard let self = self else { return }
+                if self.operationCount == 0,
+                   self.progress.completedUnitCount > 0
+                {
+                    self.progress.totalUnitCount = 0
+                    self.progress.completedUnitCount = 0
+                }
+            }
         }
         
         done = true
