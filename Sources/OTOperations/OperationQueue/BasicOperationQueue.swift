@@ -72,6 +72,7 @@ open class BasicOperationQueue: OperationQueue {
     
     // MARK: - Progress Back-Porting
     
+    @OTAtomicsThreadSafe
     private var _progress: Progress = .init()
     
     @available(macOS 10.9, iOS 7.0, tvOS 9.0, watchOS 2.0, *)
