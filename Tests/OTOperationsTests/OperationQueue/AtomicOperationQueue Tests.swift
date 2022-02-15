@@ -174,7 +174,7 @@ final class Threading_AtomicOperationQueue_Tests: XCTestCase {
             XCTFail()
         }
         
-        wait(for: opQ.status == .idle, timeout: 1.5)
+        wait(for: opQ.status == .idle, timeout: 5.0)
         
         wait(for: opQ.progress.totalUnitCount == 1, timeout: 0.5)
         XCTAssertEqual(opQ.progress.totalUnitCount, 1)
