@@ -141,7 +141,7 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
                     )
                 case 4:
                     ppQProgressTest.opQ.addOperation(
-                        .atomicBlock(.concurrentAutomatic,
+                        .atomicBlock(type: .concurrentAutomatic,
                                      initialMutableValue: 0) { opBlock in
                                          opBlock.addOperation { _ in
                                              usleep(100_000)
@@ -164,9 +164,9 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
             
             wait(for: ppQProgressTest.opQ.status == .idle, timeout: 1.5)
             
-            wait(for: ppQProgressTest.opQ.progress.totalUnitCount == 0, timeout: 0.5)
-            XCTAssertEqual(ppQProgressTest.opQ.progress.completedUnitCount, 0)
-            XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 0)
+            wait(for: ppQProgressTest.opQ.progress.totalUnitCount == 1, timeout: 0.5)
+            XCTAssertEqual(ppQProgressTest.opQ.progress.completedUnitCount, 1)
+            XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 1)
             XCTAssertFalse(ppQProgressTest.opQ.progress.isCancelled)
         }
         
