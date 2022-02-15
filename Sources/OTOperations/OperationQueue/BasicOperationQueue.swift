@@ -315,8 +315,12 @@ open class BasicOperationQueue: OperationQueue {
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) { [weak self] in
                 guard let self = self else { return }
                 if self.operationCount == 0 {
-                    self.progress.totalUnitCount = 0
-                    self.progress.completedUnitCount = 0
+                    // DO NOT SET totalUnitCount to 0 here!!!
+                    // IF YOU SET IT TO 0, PRODUCTION CODE WILL FAIL
+                    // EVEN THOUGH THE PACKAGE'S UNIT TESTS WORK CORRECTLY.
+                    
+                    self.progress.totalUnitCount = 1
+                    self.progress.completedUnitCount = 1
                 }
             }
         }
