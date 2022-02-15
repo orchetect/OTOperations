@@ -107,9 +107,11 @@ open class BasicOperationQueue: OperationQueue {
     ) {
         
         // failsafe reset of progress to known state if queue is empty
+        var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
             progress.completedUnitCount = 0
-            progress.totalUnitCount = 0
+            progress.totalUnitCount = 1
+            resetTotalUnitCountNudge = true
         }
         
         switch operationQueueType {
@@ -134,6 +136,9 @@ open class BasicOperationQueue: OperationQueue {
         
         lastAddedOperation = op
         
+        if resetTotalUnitCountNudge {
+            progress.totalUnitCount -= 1
+        }
         done = false
         super.addOperation(op)
         
@@ -161,9 +166,11 @@ open class BasicOperationQueue: OperationQueue {
         guard !ops.isEmpty else { return }
         
         // failsafe reset of progress to known state if queue is empty
+        var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
             progress.completedUnitCount = 0
-            progress.totalUnitCount = 0
+            progress.totalUnitCount = 1
+            resetTotalUnitCountNudge = true
         }
         
         switch operationQueueType {
@@ -195,6 +202,9 @@ open class BasicOperationQueue: OperationQueue {
         
         lastAddedOperation = ops.last
         
+        if resetTotalUnitCountNudge {
+            progress.totalUnitCount -= 1
+        }
         done = false
         super.addOperations(ops, waitUntilFinished: wait)
         
