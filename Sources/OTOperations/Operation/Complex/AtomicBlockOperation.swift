@@ -110,8 +110,7 @@ open class AtomicBlockOperation<T>: BasicOperation {
         }
     }
     
-    private var setupBlock: ((_ operation: AtomicBlockOperation,
-                              _ atomicValue: AtomicVariableAccess<T>) -> Void)?
+    private var setupBlock: ((_ operation: AtomicBlockOperation) -> Void)?
     
     // MARK: - Init
     
@@ -149,8 +148,7 @@ open class AtomicBlockOperation<T>: BasicOperation {
     public final override func main() {
         
         guard mainShouldStart() else { return }
-        let varAccess = AtomicVariableAccess(operationQueue: self.operationQueue)
-        setupBlock?(self, varAccess)
+        setupBlock?(self)
         
         guard operationQueue.operationCount > 0 else {
             completeOperation()
@@ -331,8 +329,7 @@ extension AtomicBlockOperation {
     
     /// Add a setup block that runs when the `AtomicBlockOperation` starts.
     public final func setSetupBlock(
-        _ block: @escaping (_ operation: AtomicBlockOperation<T>,
-                            _ atomicValue: AtomicVariableAccess<T>) -> Void
+        _ block: @escaping (_ operation: AtomicBlockOperation<T>) -> Void
     ) {
         
         setupBlock = block

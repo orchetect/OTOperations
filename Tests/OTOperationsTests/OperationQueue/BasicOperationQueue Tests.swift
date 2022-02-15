@@ -74,6 +74,15 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
         
+        for _ in 1...10 {
+            opQ.addOperation { }
+        }
+        
+        wait(for: opQ.status == .idle, timeout: 0.5)
+        wait(for: opQ.operationCount == 0, timeout: 0.5)
+        
+        XCTAssertEqual(opQ.progress.totalUnitCount, 20 * 100)
+        
     }
     
     func testResetProgressWhenFinished_True() {
@@ -81,8 +90,9 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
         class OpQProgressTest {
             var statuses: [OperationQueueStatus] = []
             
-            let opQ = BasicOperationQueue(type: .serialFIFO,
-                                          resetProgressWhenFinished: true)
+            let opQ = AtomicOperationQueue(type: .serialFIFO,
+                                           resetProgressWhenFinished: true,
+                                           initialMutableValue: 0)
             
             init() {
                 opQ.statusHandler = { newStatus, oldStatus in
@@ -99,9 +109,48 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
         let ppQProgressTest = OpQProgressTest()
         
         func runTen() {
+            ppQProgressTest.opQ.cancelAllOperations()
+            
             print("Running 10 operations...")
             for _ in 1...10 {
-                ppQProgressTest.opQ.addOperation { usleep(100_000) }
+                // pick random operation types to add,
+                // each taking the same amount of time to execute
+                switch (0...4).randomElement()! {
+                case 0:
+                    ppQProgressTest.opQ.addOperation {
+                        usleep(100_000)
+                    }
+                case 1:
+                    ppQProgressTest.opQ.addOperation(
+                        .basic {
+                            usleep(100_000)
+                        }
+                    )
+                case 2:
+                    ppQProgressTest.opQ.addOperation(
+                        .interactive { operation in
+                            usleep(100_000)
+                        }
+                    )
+                case 3:
+                    ppQProgressTest.opQ.addOperation(
+                        .interactiveAsync { operation in
+                            usleep(100_000)
+                            operation.completeOperation()
+                        }
+                    )
+                case 4:
+                    ppQProgressTest.opQ.addOperation(
+                        .atomicBlock(.concurrentAutomatic,
+                                     initialMutableValue: 0) { opBlock in
+                                         opBlock.addOperation { _ in
+                                             usleep(100_000)
+                                         }
+                                     }
+                    )
+                default:
+                    XCTFail()
+                }
             }
             
             XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 10 * 100)
@@ -118,12 +167,14 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
             wait(for: ppQProgressTest.opQ.progress.totalUnitCount == 0, timeout: 0.5)
             XCTAssertEqual(ppQProgressTest.opQ.progress.completedUnitCount, 0)
             XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 0)
+            XCTAssertFalse(ppQProgressTest.opQ.progress.isCancelled)
         }
         
         // run this global async, since the statusHandler gets called on main
         let runExp = expectation(description: "Test Run")
         DispatchQueue.global().async {
             runTen()
+            usleep(500_000)
             runTen()
             runExp.fulfill()
         }

@@ -46,7 +46,7 @@ open class BasicOperation: Operation, ProgressReporting {
     // MARK: - Progress
     
     /// Progress object representing progress of the operation.
-    public private(set) var progress: Progress = .init(totalUnitCount: 1)
+    public private(set) var progress: Progress = .discreteProgress(totalUnitCount: 1)
     
     // MARK: - KVO
     

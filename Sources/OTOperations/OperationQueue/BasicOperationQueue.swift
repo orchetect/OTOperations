@@ -73,7 +73,7 @@ open class BasicOperationQueue: OperationQueue {
     // MARK: - Progress Back-Porting
     
     @OTAtomicsThreadSafe
-    private var _progress: Progress = .init()
+    private var _progress: Progress = .discreteProgress(totalUnitCount: 0)
     
     @available(macOS 10.9, iOS 7.0, tvOS 9.0, watchOS 2.0, *)
     @objc dynamic
@@ -287,14 +287,12 @@ open class BasicOperationQueue: OperationQueue {
     
     /// Only call as a result of the queue emptying
     private func setStatusIdle(resetProgress: Bool) {
-        // enact progress reset on a delay in case
-        // more operations are added soon after the queue empties
+        // delay the progress reset, in case more operations
+        // are added soon after the operation queue empties
         if resetProgress {
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) { [weak self] in
                 guard let self = self else { return }
-                if self.operationCount == 0,
-                   self.progress.completedUnitCount > 0
-                {
+                if self.operationCount == 0 {
                     self.progress.totalUnitCount = 0
                     self.progress.completedUnitCount = 0
                 }

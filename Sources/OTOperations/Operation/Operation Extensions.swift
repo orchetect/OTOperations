@@ -42,11 +42,18 @@ extension Operation {
     /// Builder pattern can be used to add operations inline.
     public static func atomicBlock<T>(
         _ operationQueueType: OperationQueueType,
-        initialMutableValue: T
+        initialMutableValue: T,
+        _ setupBlock: ((_ operation: AtomicBlockOperation<T>) -> Void)? = nil
     ) -> AtomicBlockOperation<T> {
         
-        .init(type: operationQueueType,
-              initialMutableValue: initialMutableValue)
+        let op = AtomicBlockOperation(type: operationQueueType,
+                                      initialMutableValue: initialMutableValue)
+        
+        if let setupBlock = setupBlock {
+            op.setSetupBlock(setupBlock)
+        }
+        
+        return op
         
     }
     
