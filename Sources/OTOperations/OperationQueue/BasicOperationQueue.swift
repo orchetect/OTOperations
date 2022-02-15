@@ -210,6 +210,23 @@ open class BasicOperationQueue: OperationQueue {
         
     }
     
+    // MARK: - Convenience Operations
+    
+    /// Add an operation block.
+    public final func addOperation(
+        weight: OperationQueueProgressWeight = .default(),
+        _ block: @escaping () -> Void
+    ) {
+       
+        // wrap in an actual operation object so we can track it
+        let op = ClosureOperation {
+            block()
+        }
+        op.progressWeight = weight
+        addOperation(op)
+        
+    }
+    
     // MARK: - KVO Observers
     
     /// Retain property observers. For safety, this array must be emptied on class deinit.
