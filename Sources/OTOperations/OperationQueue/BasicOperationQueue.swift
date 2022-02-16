@@ -277,8 +277,10 @@ open class BasicOperationQueue: OperationQueue {
             { [self, progress] _, _ in
                 // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
-                guard !isSuspended else { return }
+                done = operationCount == 0
                 
+                guard !isSuspended else { return }
+
                 if !done,
                    !progress.isFinished,
                    operationCount > 0
@@ -304,7 +306,6 @@ open class BasicOperationQueue: OperationQueue {
                 
                 if done ||
                     progress.isFinished ||
-                    progress.completedUnitCount == progress.totalUnitCount ||
                     operationCount == 0
                 {
                     setStatusIdle(resetProgress: resetProgressWhenFinished)
