@@ -448,7 +448,8 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             
             qTest.mainOp.isSuspended = false
             
-            wait(for: qTest.mainOp.status == .idle, timeout: 2.0)
+            wait(for: qTest.mainOp.status == .idle, timeout: 2.0,
+                 "status == .idle check")
         }
         
         let runExp = expectation(description: "Test Run")

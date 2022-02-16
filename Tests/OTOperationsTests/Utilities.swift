@@ -12,7 +12,7 @@ extension XCTestCase {
     /// Wait for a condition to be true, with a timeout period.
     /// Polling defaults to every 10 milliseconds, but can be overridden.
     ///
-    /// Adapted from [OTCore 1.2.1](https://github.com/orchetect/OTCore) (MIT license)
+    /// Adapted from [OTCore 1.2.2](https://github.com/orchetect/OTCore) (MIT license)
     public func wait(
         for condition: @autoclosure () -> Bool,
         timeout: TimeInterval,

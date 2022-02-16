@@ -220,7 +220,8 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isIndeterminate)
         
         wait(for: [mainBlockFinishedExp], timeout: 0.7)
-        wait(for: opQ.operationCount == 0, timeout: 0.5)
+        wait(for: opQ.operationCount == 0, timeout: 0.5,
+             "operationCount == 0 check")
         
         // state
         XCTAssertEqual(opQ.operationCount, 0)
