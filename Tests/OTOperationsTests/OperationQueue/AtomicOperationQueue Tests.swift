@@ -61,9 +61,8 @@ final class AtomicOperationQueue_Tests: XCTestCase {
     func testOp_concurrentAutomatic_Pause_Run() {
         
         let opQ = AtomicOperationQueue(type: .concurrentAutomatic,
+                                       initiallySuspended: true,
                                        initialMutableValue: [Int]())
-        
-        opQ.isSuspended = true
         
         XCTAssertEqual(opQ.status, .paused)
         
@@ -84,9 +83,11 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         XCTAssertEqual(opQ.status, .paused)
         
         opQ.isSuspended = false
+        
         wait(for: (opQ.status != .paused && opQ.status != .idle), timeout: 0.2)
         
-        wait(for: opQ.status == .idle, timeout: 3.0)
+        wait(for: opQ.operationCount == 0, timeout: 2.0)
+        wait(for: opQ.status == .idle, timeout: 0.5)
         XCTAssertEqual(opQ.status, .idle)
         
         XCTAssertEqual(opQ.sharedMutableValue.count, 100)

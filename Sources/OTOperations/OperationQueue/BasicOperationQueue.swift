@@ -39,7 +39,7 @@ open class BasicOperationQueue: OperationQueue {
         
     }
     
-    private var done = true
+    @OTAtomicsThreadSafe private var done = true
     
     // MARK: - Status
     
@@ -53,6 +53,15 @@ open class BasicOperationQueue: OperationQueue {
         }
         set {
             let oldValue = _status
+            
+            // prevent .inProgress status if `done` is set
+            var newValue = newValue
+            if done {
+                if newValue != .idle && newValue != .paused {
+                    newValue = .idle
+                }
+            }
+            
             _status = newValue
             
             if newValue != oldValue {
@@ -254,7 +263,10 @@ open class BasicOperationQueue: OperationQueue {
                 if isSuspended {
                     status = .paused
                 } else {
-                    if done {
+                    if done ||
+                        progress.isFinished ||
+                        operationCount == 0
+                    {
                         setStatusIdle(resetProgress: resetProgressWhenFinished)
                     } else {
                         status = .inProgress(
