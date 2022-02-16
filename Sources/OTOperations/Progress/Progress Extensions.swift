@@ -14,7 +14,9 @@ extension Progress {
     internal var parent: Progress? {
         
         // keyPath "_parent" also works
-        value(forKeyPath: "parent") as? Progress
+        let getParent = value(forKeyPath: "parent")
+        let typedParent = getParent as? Progress
+        return typedParent
         
     }
     
@@ -23,7 +25,9 @@ extension Progress {
     internal var children: Set<Progress> {
         
         // keyPath "_children" also works
-        value(forKeyPath: "children") as? Set<Progress> ?? []
+        let getChildren = value(forKeyPath: "children")
+        let typedChildren = getChildren as? Set<Progress>
+        return typedChildren ?? []
         
     }
     
