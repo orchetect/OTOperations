@@ -106,7 +106,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { $0.mutate { $0.append(val) } }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5)
+        wait(for: opQ.status == .idle, timeout: 1.0)
         //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
         //XCTAssertEqual(timeoutResult, .success)
         
@@ -168,11 +168,13 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
         
+        usleep(20_000)
+        
         switch opQ.status {
         case .inProgress:
             break // correct
         default:
-            XCTFail()
+            XCTFail("Status is \(opQ.status)")
         }
         
         wait(for: opQ.status == .idle, timeout: 5.0)
