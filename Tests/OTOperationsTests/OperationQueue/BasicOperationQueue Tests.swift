@@ -8,7 +8,7 @@
 import XCTest
 @testable import OTOperations
 
-final class Threading_BasicOperationQueue_Tests: XCTestCase {
+final class BasicOperationQueue_Tests: XCTestCase {
     
     /// Serial FIFO queue.
     func testOperationQueueType_serialFIFO() {

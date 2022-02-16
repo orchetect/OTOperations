@@ -8,7 +8,7 @@
 import XCTest
 @testable import OTOperations
 
-final class Threading_AtomicBlockOperation_Tests: XCTestCase {
+final class AtomicBlockOperation_Tests: XCTestCase {
     
     func testEmpty() {
         

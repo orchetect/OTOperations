@@ -8,7 +8,7 @@
 import XCTest
 import OTOperations
 
-final class Threading_BasicOperation_Tests: XCTestCase {
+final class BasicOperation_Tests: XCTestCase {
     
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
