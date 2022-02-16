@@ -164,7 +164,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
             
             wait(for: ppQProgressTest.opQ.status == .idle, timeout: 1.5)
             
-            wait(for: ppQProgressTest.opQ.progress.totalUnitCount == 1, timeout: 0.5)
+            wait(for: ppQProgressTest.opQ.progress.totalUnitCount == 1, timeout: 1.0)
             XCTAssertEqual(ppQProgressTest.opQ.progress.completedUnitCount, 1)
             XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 1)
             XCTAssertFalse(ppQProgressTest.opQ.progress.isCancelled)
