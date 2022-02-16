@@ -6,9 +6,10 @@
 #if shouldTestCurrentPlatform
 
 import XCTest
+import XCTestUtils
 @testable import OTOperations
 
-final class Threading_AtomicBlockOperation_Tests: XCTestCase {
+final class AtomicBlockOperation_Tests: XCTestCase {
     
     func testEmpty() {
         
@@ -402,7 +403,7 @@ final class Threading_AtomicBlockOperation_Tests: XCTestCase {
     /// Ensure that nested progress objects successfully result in the topmost queue calling statusHandler at every increment of all progress children at every level.
     func testProgress() {
         
-        class OpQProgressTest {
+        class AtomicOperationQueueProgressTest {
             var statuses: [OperationQueueStatus] = []
             
             let mainOp = AtomicOperationQueue(type: .serialFIFO,
@@ -423,17 +424,19 @@ final class Threading_AtomicBlockOperation_Tests: XCTestCase {
             }
         }
         
-        let ppQProgressTest = OpQProgressTest()
+        let qTest = AtomicOperationQueueProgressTest()
         
         func runTest() {
             // 5 ops, each with 2 ops, each with 2 units of progress.
             // should equate to 20 total main progress updates 5% apart
             for _ in 1...5 {
                 let subOp = AtomicBlockOperation(type: .serialFIFO,
+                                                 label: "Top",
                                                  initialMutableValue: 0)
                 
-                for _ in 1...2 {
-                    subOp.addInteractiveOperation { operation, atomicValue in
+                for subOpNum in 1...2 {
+                    subOp.addInteractiveOperation(label: "Sub\(subOpNum)")
+                    { operation, atomicValue in
                         operation.progress.totalUnitCount = 2
                         
                         operation.progress.completedUnitCount = 1
@@ -441,12 +444,12 @@ final class Threading_AtomicBlockOperation_Tests: XCTestCase {
                     }
                 }
                 
-                ppQProgressTest.mainOp.addOperation(subOp)
+                qTest.mainOp.addOperation(subOp)
             }
             
-            ppQProgressTest.mainOp.isSuspended = false
+            qTest.mainOp.isSuspended = false
             
-            wait(for: ppQProgressTest.mainOp.status == .idle, timeout: 2.0)
+            wait(for: qTest.mainOp.status, equals: .idle, timeout: 2.0)
         }
         
         let runExp = expectation(description: "Test Run")
@@ -456,31 +459,55 @@ final class Threading_AtomicBlockOperation_Tests: XCTestCase {
         }
         wait(for: [runExp], timeout: 5.0)
         
-        XCTAssertEqual(ppQProgressTest.statuses, [
-            .idle,
-            .paused,
-            .inProgress(fractionCompleted: 0.00, message: "0% completed"),
-            .inProgress(fractionCompleted: 0.05, message: "5% completed"),
-            .inProgress(fractionCompleted: 0.10, message: "10% completed"),
-            .inProgress(fractionCompleted: 0.15, message: "15% completed"),
-            .inProgress(fractionCompleted: 0.20, message: "20% completed"),
-            .inProgress(fractionCompleted: 0.25, message: "25% completed"),
-            .inProgress(fractionCompleted: 0.30, message: "30% completed"),
-            .inProgress(fractionCompleted: 0.35, message: "35% completed"),
-            .inProgress(fractionCompleted: 0.40, message: "40% completed"),
-            .inProgress(fractionCompleted: 0.45, message: "45% completed"),
-            .inProgress(fractionCompleted: 0.50, message: "50% completed"),
-            .inProgress(fractionCompleted: 0.55, message: "55% completed"),
-            .inProgress(fractionCompleted: 0.60, message: "60% completed"),
-            .inProgress(fractionCompleted: 0.65, message: "65% completed"),
-            .inProgress(fractionCompleted: 0.70, message: "70% completed"),
-            .inProgress(fractionCompleted: 0.75, message: "75% completed"),
-            .inProgress(fractionCompleted: 0.80, message: "80% completed"),
-            .inProgress(fractionCompleted: 0.85, message: "85% completed"),
-            .inProgress(fractionCompleted: 0.90, message: "90% completed"),
-            .inProgress(fractionCompleted: 0.95, message: "95% completed"),
-            .idle
-        ])
+        XCTAssertEqual(qTest.statuses[00], .idle)
+        XCTAssertEqual(qTest.statuses[01], .paused)
+        XCTAssertEqual(qTest.statuses[02].inProgressFractionCompleted, 0.00)
+        XCTAssertEqual(qTest.statuses[03].inProgressFractionCompleted, 0.05)
+        XCTAssertEqual(qTest.statuses[04].inProgressFractionCompleted, 0.10)
+        XCTAssertEqual(qTest.statuses[05].inProgressFractionCompleted, 0.15)
+        XCTAssertEqual(qTest.statuses[06].inProgressFractionCompleted, 0.20)
+        XCTAssertEqual(qTest.statuses[07].inProgressFractionCompleted, 0.25)
+        XCTAssertEqual(qTest.statuses[08].inProgressFractionCompleted, 0.30)
+        XCTAssertEqual(qTest.statuses[09].inProgressFractionCompleted, 0.35)
+        XCTAssertEqual(qTest.statuses[10].inProgressFractionCompleted, 0.40)
+        XCTAssertEqual(qTest.statuses[11].inProgressFractionCompleted, 0.45)
+        XCTAssertEqual(qTest.statuses[12].inProgressFractionCompleted, 0.50)
+        XCTAssertEqual(qTest.statuses[13].inProgressFractionCompleted, 0.55)
+        XCTAssertEqual(qTest.statuses[14].inProgressFractionCompleted, 0.60)
+        XCTAssertEqual(qTest.statuses[15].inProgressFractionCompleted, 0.65)
+        XCTAssertEqual(qTest.statuses[16].inProgressFractionCompleted, 0.70)
+        XCTAssertEqual(qTest.statuses[17].inProgressFractionCompleted, 0.75)
+        XCTAssertEqual(qTest.statuses[18].inProgressFractionCompleted, 0.80)
+        XCTAssertEqual(qTest.statuses[19].inProgressFractionCompleted, 0.85)
+        XCTAssertEqual(qTest.statuses[20].inProgressFractionCompleted, 0.90)
+        XCTAssertEqual(qTest.statuses[21].inProgressFractionCompleted, 0.95)
+        XCTAssertEqual(qTest.statuses[22], .idle)
+        
+        // TODO: probably shouldn't test inProgress description since it's brittle;
+        // TODO: it uses localizedDescription which may not always be English
+        //                           [00] .idle
+        //                           [01] .paused
+        XCTAssertEqual(qTest.statuses[02].inProgressDescription, "0% completed")
+        XCTAssertEqual(qTest.statuses[03].inProgressDescription, "5% completed")
+        XCTAssertEqual(qTest.statuses[04].inProgressDescription, "10% completed")
+        XCTAssertEqual(qTest.statuses[05].inProgressDescription, "15% completed")
+        XCTAssertEqual(qTest.statuses[06].inProgressDescription, "20% completed")
+        XCTAssertEqual(qTest.statuses[07].inProgressDescription, "25% completed")
+        XCTAssertEqual(qTest.statuses[08].inProgressDescription, "30% completed")
+        XCTAssertEqual(qTest.statuses[09].inProgressDescription, "35% completed")
+        XCTAssertEqual(qTest.statuses[10].inProgressDescription, "40% completed")
+        XCTAssertEqual(qTest.statuses[11].inProgressDescription, "45% completed")
+        XCTAssertEqual(qTest.statuses[12].inProgressDescription, "50% completed")
+        XCTAssertEqual(qTest.statuses[13].inProgressDescription, "55% completed")
+        XCTAssertEqual(qTest.statuses[14].inProgressDescription, "60% completed")
+        XCTAssertEqual(qTest.statuses[15].inProgressDescription, "65% completed")
+        XCTAssertEqual(qTest.statuses[16].inProgressDescription, "70% completed")
+        XCTAssertEqual(qTest.statuses[17].inProgressDescription, "75% completed")
+        XCTAssertEqual(qTest.statuses[18].inProgressDescription, "80% completed")
+        XCTAssertEqual(qTest.statuses[19].inProgressDescription, "85% completed")
+        XCTAssertEqual(qTest.statuses[20].inProgressDescription, "90% completed")
+        XCTAssertEqual(qTest.statuses[21].inProgressDescription, "95% completed")
+        //                           [22] .idle
         
     }
     

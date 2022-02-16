@@ -6,9 +6,10 @@
 #if shouldTestCurrentPlatform
 
 import XCTest
+import XCTestUtils
 @testable import OTOperations
 
-final class Threading_BasicOperationQueue_Tests: XCTestCase {
+final class BasicOperationQueue_Tests: XCTestCase {
     
     /// Serial FIFO queue.
     func testOperationQueueType_serialFIFO() {
@@ -56,7 +57,7 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
         
         op = nil
         opQ.isSuspended = false
-        wait(for: opQ.lastAddedOperation == nil, timeout: 0.5)
+        wait(for: opQ.lastAddedOperation, equals: nil, timeout: 0.5)
         
     }
     
@@ -69,8 +70,8 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5)
-        wait(for: opQ.operationCount == 0, timeout: 0.5)
+        wait(for: opQ.status, equals: .idle, timeout: 0.5)
+        wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
         
@@ -78,8 +79,8 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5)
-        wait(for: opQ.operationCount == 0, timeout: 0.5)
+        wait(for: opQ.status, equals: .idle, timeout: 0.5)
+        wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 20 * 100)
         
@@ -87,7 +88,7 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
     
     func testResetProgressWhenFinished_True() {
         
-        class OpQProgressTest {
+        class AtomicOperationQueueProgressTest {
             var statuses: [OperationQueueStatus] = []
             
             let opQ = AtomicOperationQueue(type: .serialFIFO,
@@ -95,6 +96,8 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
                                            initialMutableValue: 0)
             
             init() {
+                opQ.labelProgress.label = "Main"
+                
                 opQ.statusHandler = { newStatus, oldStatus in
                     if self.statuses.isEmpty {
                         self.statuses.append(oldStatus)
@@ -106,68 +109,66 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
             }
         }
         
-        let ppQProgressTest = OpQProgressTest()
+        let qTest = AtomicOperationQueueProgressTest()
         
         func runTen() {
-            ppQProgressTest.opQ.cancelAllOperations()
+            qTest.opQ.cancelAllOperations()
             
             print("Running 10 operations...")
             for _ in 1...10 {
                 // pick random operation types to add,
                 // each taking the same amount of time to execute
-                switch (0...4).randomElement()! {
+                switch (0...3).randomElement()! {
                 case 0:
-                    ppQProgressTest.opQ.addOperation {
+                    qTest.opQ.addOperation {
                         usleep(100_000)
                     }
                 case 1:
-                    ppQProgressTest.opQ.addOperation(
+                    qTest.opQ.addOperation(
                         .basic {
                             usleep(100_000)
                         }
                     )
                 case 2:
-                    ppQProgressTest.opQ.addOperation(
+                    qTest.opQ.addOperation(
                         .interactive { operation in
                             usleep(100_000)
                         }
                     )
                 case 3:
-                    ppQProgressTest.opQ.addOperation(
+                    qTest.opQ.addOperation(
                         .interactiveAsync { operation in
                             usleep(100_000)
                             operation.completeOperation()
                         }
                     )
-                case 4:
-                    ppQProgressTest.opQ.addOperation(
-                        .atomicBlock(type: .concurrentAutomatic,
-                                     initialMutableValue: 0) { opBlock in
-                                         opBlock.addOperation { _ in
-                                             usleep(100_000)
-                                         }
-                                     }
-                    )
+                //case 4:
+                //    qTest.opQ.addOperation(
+                //        .atomicBlock(type: .concurrentAutomatic,
+                //                     initialMutableValue: 0) { opBlock in
+                //                         opBlock.addOperation { _ in
+                //                             usleep(100_000)
+                //                         }
+                //                     }
+                //    )
                 default:
-                    XCTFail()
+                    XCTFail() ; return
                 }
             }
             
-            XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 10 * 100)
+            XCTAssertEqual(qTest.opQ.progress.totalUnitCount, 10 * 100)
             
-            switch ppQProgressTest.opQ.status {
-            case .inProgress(fractionCompleted: _, message: _):
+            switch qTest.opQ.status {
+            case .inProgress:
                 break // correct
             default:
                 XCTFail()
             }
             
-            wait(for: ppQProgressTest.opQ.status == .idle, timeout: 1.5)
-            
-            wait(for: ppQProgressTest.opQ.progress.totalUnitCount == 1, timeout: 0.5)
-            XCTAssertEqual(ppQProgressTest.opQ.progress.completedUnitCount, 1)
-            XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 1)
-            XCTAssertFalse(ppQProgressTest.opQ.progress.isCancelled)
+            wait(for: qTest.opQ.status, equals: .idle, timeout: 3.0)
+            wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 1.0)
+            wait(for: qTest.opQ.progress.completedUnitCount, equals: 1, timeout: 0.2)
+            XCTAssertFalse(qTest.opQ.progress.isCancelled)
         }
         
         // run this global async, since the statusHandler gets called on main
@@ -180,72 +181,127 @@ final class Threading_BasicOperationQueue_Tests: XCTestCase {
         }
         wait(for: [runExp], timeout: 10.0)
         
-        XCTAssertEqual(ppQProgressTest.statuses, [
-            .idle,
-            .inProgress(fractionCompleted: 0.0, message: "0% completed"),
-            .inProgress(fractionCompleted: 0.1, message: "10% completed"),
-            .inProgress(fractionCompleted: 0.2, message: "20% completed"),
-            .inProgress(fractionCompleted: 0.3, message: "30% completed"),
-            .inProgress(fractionCompleted: 0.4, message: "40% completed"),
-            .inProgress(fractionCompleted: 0.5, message: "50% completed"),
-            .inProgress(fractionCompleted: 0.6, message: "60% completed"),
-            .inProgress(fractionCompleted: 0.7, message: "70% completed"),
-            .inProgress(fractionCompleted: 0.8, message: "80% completed"),
-            .inProgress(fractionCompleted: 0.9, message: "90% completed"),
-            .idle,
-            .inProgress(fractionCompleted: 0.0, message: "0% completed"),
-            .inProgress(fractionCompleted: 0.1, message: "10% completed"),
-            .inProgress(fractionCompleted: 0.2, message: "20% completed"),
-            .inProgress(fractionCompleted: 0.3, message: "30% completed"),
-            .inProgress(fractionCompleted: 0.4, message: "40% completed"),
-            .inProgress(fractionCompleted: 0.5, message: "50% completed"),
-            .inProgress(fractionCompleted: 0.6, message: "60% completed"),
-            .inProgress(fractionCompleted: 0.7, message: "70% completed"),
-            .inProgress(fractionCompleted: 0.8, message: "80% completed"),
-            .inProgress(fractionCompleted: 0.9, message: "90% completed"),
-            .idle
-        ])
+        XCTAssertEqual(qTest.statuses[00], .idle)
+        XCTAssertEqual(qTest.statuses[01].inProgressFractionCompleted, 0.0)
+        XCTAssertEqual(qTest.statuses[02].inProgressFractionCompleted, 0.1)
+        XCTAssertEqual(qTest.statuses[03].inProgressFractionCompleted, 0.2)
+        XCTAssertEqual(qTest.statuses[04].inProgressFractionCompleted, 0.3)
+        XCTAssertEqual(qTest.statuses[05].inProgressFractionCompleted, 0.4)
+        XCTAssertEqual(qTest.statuses[06].inProgressFractionCompleted, 0.5)
+        XCTAssertEqual(qTest.statuses[07].inProgressFractionCompleted, 0.6)
+        XCTAssertEqual(qTest.statuses[08].inProgressFractionCompleted, 0.7)
+        XCTAssertEqual(qTest.statuses[09].inProgressFractionCompleted, 0.8)
+        XCTAssertEqual(qTest.statuses[10].inProgressFractionCompleted, 0.9)
+        XCTAssertEqual(qTest.statuses[11], .idle)
+        XCTAssertEqual(qTest.statuses[12].inProgressFractionCompleted, 0.0)
+        XCTAssertEqual(qTest.statuses[13].inProgressFractionCompleted, 0.1)
+        XCTAssertEqual(qTest.statuses[14].inProgressFractionCompleted, 0.2)
+        XCTAssertEqual(qTest.statuses[15].inProgressFractionCompleted, 0.3)
+        XCTAssertEqual(qTest.statuses[16].inProgressFractionCompleted, 0.4)
+        XCTAssertEqual(qTest.statuses[17].inProgressFractionCompleted, 0.5)
+        XCTAssertEqual(qTest.statuses[18].inProgressFractionCompleted, 0.6)
+        XCTAssertEqual(qTest.statuses[19].inProgressFractionCompleted, 0.7)
+        XCTAssertEqual(qTest.statuses[20].inProgressFractionCompleted, 0.8)
+        XCTAssertEqual(qTest.statuses[21].inProgressFractionCompleted, 0.9)
+        XCTAssertEqual(qTest.statuses[22], .idle)
+        
+        //                           [00] .idle
+        XCTAssertEqual(qTest.statuses[01].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[02].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[03].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[04].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[05].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[06].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[07].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[08].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[09].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[10].inProgressLabel, "Main")
+        //                           [11] .idle
+        XCTAssertEqual(qTest.statuses[12].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[13].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[14].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[15].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[16].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[17].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[18].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[19].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[20].inProgressLabel, "Main")
+        XCTAssertEqual(qTest.statuses[21].inProgressLabel, "Main")
+        //                           [22] .idle
+        
+        // TODO: probably shouldn't test inProgress description since it's brittle;
+        // TODO: it uses localizedDescription which may not always be English
+        //                           [00] .idle
+        XCTAssertEqual(qTest.statuses[01].inProgressDescription, "0% completed")
+        XCTAssertEqual(qTest.statuses[02].inProgressDescription, "10% completed")
+        XCTAssertEqual(qTest.statuses[03].inProgressDescription, "20% completed")
+        XCTAssertEqual(qTest.statuses[04].inProgressDescription, "30% completed")
+        XCTAssertEqual(qTest.statuses[05].inProgressDescription, "40% completed")
+        XCTAssertEqual(qTest.statuses[06].inProgressDescription, "50% completed")
+        XCTAssertEqual(qTest.statuses[07].inProgressDescription, "60% completed")
+        XCTAssertEqual(qTest.statuses[08].inProgressDescription, "70% completed")
+        XCTAssertEqual(qTest.statuses[09].inProgressDescription, "80% completed")
+        XCTAssertEqual(qTest.statuses[10].inProgressDescription, "90% completed")
+        //                           [11] .idle
+        XCTAssertEqual(qTest.statuses[12].inProgressDescription, "0% completed")
+        XCTAssertEqual(qTest.statuses[13].inProgressDescription, "10% completed")
+        XCTAssertEqual(qTest.statuses[14].inProgressDescription, "20% completed")
+        XCTAssertEqual(qTest.statuses[15].inProgressDescription, "30% completed")
+        XCTAssertEqual(qTest.statuses[16].inProgressDescription, "40% completed")
+        XCTAssertEqual(qTest.statuses[17].inProgressDescription, "50% completed")
+        XCTAssertEqual(qTest.statuses[18].inProgressDescription, "60% completed")
+        XCTAssertEqual(qTest.statuses[19].inProgressDescription, "70% completed")
+        XCTAssertEqual(qTest.statuses[20].inProgressDescription, "80% completed")
+        XCTAssertEqual(qTest.statuses[21].inProgressDescription, "90% completed")
+        //                           [22] .idle
         
     }
     
     func testStatus() {
         
-        let opQ = BasicOperationQueue(type: .serialFIFO)
-        
-        opQ.statusHandler = { newStatus, oldStatus in
-            print(oldStatus, newStatus)
+        func runTest(resetWhenFinished: Bool) {
+            let opQ = BasicOperationQueue(type: .serialFIFO,
+                                          resetProgressWhenFinished: resetWhenFinished)
+            
+            opQ.statusHandler = { newStatus, oldStatus in
+                print(oldStatus, newStatus)
+            }
+            
+            XCTAssertEqual(opQ.status, .idle)
+            
+            let completionBlockExp = expectation(description: "Operation Completion")
+            
+            opQ.addOperation {
+                usleep(100_000)
+                completionBlockExp.fulfill()
+            }
+            
+            switch opQ.status {
+            case .inProgress(let fractionCompleted, let label, let desc):
+                XCTAssertEqual(fractionCompleted, 0.0)
+                _ = label // don't test label content, for now
+                _ = desc // don't test desc content, for now
+            default:
+                XCTFail()
+            }
+            
+            wait(for: [completionBlockExp], timeout: 0.5)
+            wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
+            wait(for: opQ.progress.isFinished, timeout: 0.5, "progress.isFinished")
+            
+            XCTAssertEqual(opQ.status, .idle)
+            
+            opQ.isSuspended = true
+            
+            XCTAssertEqual(opQ.status, .paused)
+            
+            opQ.isSuspended = false
+            
+            XCTAssertEqual(opQ.status, .idle)
         }
         
-        XCTAssertEqual(opQ.status, .idle)
-        
-        let completionBlockExp = expectation(description: "Operation Completion")
-        
-        opQ.addOperation {
-            usleep(100_000)
-            completionBlockExp.fulfill()
-        }
-        
-        switch opQ.status {
-        case .inProgress(let fractionCompleted, let message):
-            XCTAssertEqual(fractionCompleted, 0.0)
-            _ = message // don't test message content, for now
-        default:
-            XCTFail()
-        }
-        
-        wait(for: [completionBlockExp], timeout: 0.5)
-        wait(for: opQ.operationCount == 0, timeout: 0.5)
-        wait(for: opQ.progress.isFinished, timeout: 0.5)
-        
-        XCTAssertEqual(opQ.status, .idle)
-        
-        opQ.isSuspended = true
-        
-        XCTAssertEqual(opQ.status, .paused)
-        
-        opQ.isSuspended = false
-        
-        XCTAssertEqual(opQ.status, .idle)
+        runTest(resetWhenFinished: false)
+        runTest(resetWhenFinished: true)
         
     }
     

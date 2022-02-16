@@ -8,7 +8,7 @@
 import XCTest
 import OTOperations
 
-final class Threading_ClosureOperation_Tests: XCTestCase {
+final class ClosureOperation_Tests: XCTestCase {
     
     override func setUpWithError() throws {
         mainCheck = { }

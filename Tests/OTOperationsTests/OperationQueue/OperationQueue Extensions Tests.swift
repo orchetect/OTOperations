@@ -9,7 +9,7 @@ import XCTest
 import OTOperations
 import OTAtomics
 
-final class Threading_OperationQueueExtensions_Success_Tests: XCTestCase {
+final class OperationQueueExtensions_Success_Tests: XCTestCase {
     
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
@@ -40,7 +40,7 @@ final class Threading_OperationQueueExtensions_Success_Tests: XCTestCase {
     
 }
 
-final class Threading_OperationQueueExtensions_TimedOut_Tests: XCTestCase {
+final class OperationQueueExtensions_TimedOut_Tests: XCTestCase {
     
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }

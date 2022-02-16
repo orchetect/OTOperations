@@ -17,6 +17,9 @@ let package = Package(
     
     dependencies: [
         .package(url: "https://github.com/orchetect/OTAtomics", from: "1.0.0"),
+        
+        // testing-only:
+        .package(url: "https://github.com/orchetect/XCTestUtils", from: "1.0.0"),
     ],
     
     targets: [
@@ -25,7 +28,7 @@ let package = Package(
             dependencies: ["OTAtomics"]),
         .testTarget(
             name: "OTOperationsTests",
-            dependencies: ["OTOperations"])
+            dependencies: ["OTOperations", "XCTestUtils"])
     ]
 )
 

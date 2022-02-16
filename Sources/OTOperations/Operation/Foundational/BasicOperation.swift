@@ -46,10 +46,17 @@ open class BasicOperation: Operation, ProgressReporting {
     // MARK: - Progress
     
     /// Progress object representing progress of the operation.
-    public private(set) var progress: Progress = .discreteProgress(totalUnitCount: 1)
+    public private(set) var progress: Progress = LabelProgress(totalUnitCount: 1)
+   
+    /// Return `.progress` typed as `LabelProgress` in order to get or set label information.
+    public final var labelProgress: LabelProgress {
+        
+        progress as! LabelProgress
+        
+    }
     
     /// Progress weight when the operation is added to a `BasicOperationQueue` or one of its subclasses.
-    public var progressWeight: OperationQueueProgressWeight = .default()
+    public var progressWeight: BasicOperationQueue.ProgressWeight
     
     // MARK: - KVO
     
@@ -78,6 +85,15 @@ open class BasicOperation: Operation, ProgressReporting {
     private var _qualityOfService: QualityOfService = .default {
         willSet { willChangeValue(for: \.qualityOfService) }
         didSet { didChangeValue(for: \.qualityOfService) }
+    }
+    
+    public init(label: String? = nil,
+                weight: BasicOperationQueue.ProgressWeight = .default()) {
+        
+        progressWeight = weight
+        super.init()
+        if label != nil { labelProgress.label = label }
+        
     }
     
     // MARK: - Method Overrides

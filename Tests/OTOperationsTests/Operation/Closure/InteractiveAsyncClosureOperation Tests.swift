@@ -8,7 +8,7 @@
 import XCTest
 import OTOperations
 
-final class Threading_InteractiveAsyncClosureOperation_Tests: XCTestCase {
+final class InteractiveAsyncClosureOperation_Tests: XCTestCase {
     
     func testOpRun() {
         

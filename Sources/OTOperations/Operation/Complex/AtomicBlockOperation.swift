@@ -115,9 +115,11 @@ open class AtomicBlockOperation<T>: BasicOperation {
     // MARK: - Init
     
     public init(type operationQueueType: OperationQueueType,
-                initialMutableValue: T,
                 qualityOfService: QualityOfService? = nil,
                 resetProgressWhenFinished: Bool = false,
+                label: String? = nil,
+                weight: BasicOperationQueue.ProgressWeight = .default(),
+                initialMutableValue: T,
                 statusHandler: BasicOperationQueue.StatusHandler? = nil) {
         
         // assign properties
@@ -127,11 +129,14 @@ open class AtomicBlockOperation<T>: BasicOperation {
             initiallySuspended: true,
             resetProgressWhenFinished: resetProgressWhenFinished,
             initialMutableValue: initialMutableValue,
+            label: label,
             statusHandler: statusHandler
         )
         
         // super
-        super.init()
+        super.init(weight: weight)
+        
+        progressWeight = weight
         
         if let qualityOfService = qualityOfService {
             self.qualityOfService = qualityOfService
@@ -259,11 +264,17 @@ extension AtomicBlockOperation {
     /// - returns: The new operation.
     @discardableResult
     public final func addOperation(
+        label: String? = nil,
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         dependencies: [Operation] = [],
-        _ block: @escaping (_ atomicValue: AtomicVariableAccess<T>) -> Void
+        _ block: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) -> ClosureOperation {
         
-        operationQueue.addOperation(dependencies: dependencies, block)
+        operationQueue.addOperation(
+            label: label,
+            weight: weight,
+            dependencies: dependencies, block
+        )
         
     }
     
@@ -273,17 +284,23 @@ extension AtomicBlockOperation {
     /// - returns: The new operation.
     @discardableResult
     public final func addInteractiveOperation(
+        label: String? = nil,
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         dependencies: [Operation] = [],
         _ block: @escaping (_ operation: InteractiveClosureOperation,
-                            _ atomicValue: AtomicVariableAccess<T>) -> Void
+                            _ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) -> InteractiveClosureOperation {
         
-        operationQueue.addInteractiveOperation(dependencies: dependencies, block)
+        operationQueue.addInteractiveOperation(
+            label: label,
+            weight: weight,
+            dependencies: dependencies, block
+        )
         
     }
     
     /// Add an operation to the operation queue.
-    public final func addOperation(_ op: Operation){
+    public final func addOperation(_ op: Operation) {
         
         operationQueue.addOperation(op)
         
@@ -303,7 +320,7 @@ extension AtomicBlockOperation {
     /// Invoked after all currently enqueued operations have finished. Operations you add after the barrier block don’t start until the block has completed.
     @available(macOS 10.15, iOS 13.0, tvOS 13, watchOS 6, *)
     public final func addBarrierBlock(
-        _ barrier: @escaping (_ atomicValue: AtomicVariableAccess<T>) -> Void
+        _ barrier: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) {
         
         operationQueue.addBarrierBlock(barrier)
@@ -338,12 +355,12 @@ extension AtomicBlockOperation {
     
     /// Add a completion block that runs when the `AtomicBlockOperation` completes all its operations.
     public final func setCompletionBlock(
-        _ block: @escaping (_ atomicValue: AtomicVariableAccess<T>) -> Void
+        _ block: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) {
         
         completionBlock = { [weak self] in
             guard let self = self else { return }
-            let varAccess = AtomicVariableAccess(operationQueue: self.operationQueue)
+            let varAccess = AtomicOperationQueue<T>.VariableAccess(operationQueue: self.operationQueue)
             block(varAccess)
         }
         
