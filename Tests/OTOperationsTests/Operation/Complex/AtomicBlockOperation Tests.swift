@@ -6,6 +6,7 @@
 #if shouldTestCurrentPlatform
 
 import XCTest
+import XCTestUtils
 @testable import OTOperations
 
 final class AtomicBlockOperation_Tests: XCTestCase {
@@ -448,8 +449,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             
             qTest.mainOp.isSuspended = false
             
-            wait(for: qTest.mainOp.status == .idle, timeout: 2.0,
-                 "status == .idle check")
+            wait(for: qTest.mainOp.status, equals: .idle, timeout: 2.0)
         }
         
         let runExp = expectation(description: "Test Run")

@@ -6,6 +6,7 @@
 #if shouldTestCurrentPlatform
 
 import XCTest
+import XCTestUtils
 import OTOperations
 
 final class AsyncClosureOperation_Tests: XCTestCase {
@@ -220,8 +221,7 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isIndeterminate)
         
         wait(for: [mainBlockFinishedExp], timeout: 0.7)
-        wait(for: opQ.operationCount == 0, timeout: 0.5,
-             "operationCount == 0 check")
+        wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
         
         // state
         XCTAssertEqual(opQ.operationCount, 0)

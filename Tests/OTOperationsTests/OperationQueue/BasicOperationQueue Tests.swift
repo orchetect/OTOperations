@@ -6,6 +6,7 @@
 #if shouldTestCurrentPlatform
 
 import XCTest
+import XCTestUtils
 @testable import OTOperations
 
 final class BasicOperationQueue_Tests: XCTestCase {
@@ -56,8 +57,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
         
         op = nil
         opQ.isSuspended = false
-        wait(for: opQ.lastAddedOperation == nil, timeout: 0.5,
-             "lastAddedOperation == nil check")
+        wait(for: opQ.lastAddedOperation, equals: nil, timeout: 0.5)
         
     }
     
@@ -70,10 +70,8 @@ final class BasicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5,
-             "status == .idle check")
-        wait(for: opQ.operationCount == 0, timeout: 0.5,
-             "operationCount == 0 check")
+        wait(for: opQ.status, equals: .idle, timeout: 0.5)
+        wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
         
@@ -81,10 +79,8 @@ final class BasicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5,
-             "status == .idle check")
-        wait(for: opQ.operationCount == 0, timeout: 0.5,
-             "operationCount == 0 check")
+        wait(for: opQ.status, equals: .idle, timeout: 0.5)
+        wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 20 * 100)
         
@@ -169,11 +165,9 @@ final class BasicOperationQueue_Tests: XCTestCase {
                 XCTFail()
             }
             
-            wait(for: qTest.opQ.status == .idle, timeout: 1.5,
-                 "status == .idle check")
+            wait(for: qTest.opQ.status, equals: .idle, timeout: 1.5)
             
-            wait(for: qTest.opQ.progress.totalUnitCount == 1, timeout: 1.0,
-                 "totalUnitCount == 1 check")
+            wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 1.0)
             XCTAssertEqual(qTest.opQ.progress.completedUnitCount, 1)
             XCTAssertEqual(qTest.opQ.progress.totalUnitCount, 1)
             XCTAssertFalse(qTest.opQ.progress.isCancelled)
@@ -267,45 +261,49 @@ final class BasicOperationQueue_Tests: XCTestCase {
     
     func testStatus() {
         
-        let opQ = BasicOperationQueue(type: .serialFIFO)
-        
-        opQ.statusHandler = { newStatus, oldStatus in
-            print(oldStatus, newStatus)
+        func runTest(resetWhenFinished: Bool) {
+            let opQ = BasicOperationQueue(type: .serialFIFO,
+                                          resetProgressWhenFinished: resetWhenFinished)
+            
+            opQ.statusHandler = { newStatus, oldStatus in
+                print(oldStatus, newStatus)
+            }
+            
+            XCTAssertEqual(opQ.status, .idle)
+            
+            let completionBlockExp = expectation(description: "Operation Completion")
+            
+            opQ.addOperation {
+                usleep(100_000)
+                completionBlockExp.fulfill()
+            }
+            
+            switch opQ.status {
+            case .inProgress(let fractionCompleted, let label, let desc):
+                XCTAssertEqual(fractionCompleted, 0.0)
+                _ = label // don't test label content, for now
+                _ = desc // don't test desc content, for now
+            default:
+                XCTFail()
+            }
+            
+            wait(for: [completionBlockExp], timeout: 0.5)
+            wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
+            wait(for: opQ.progress.isFinished, timeout: 0.5, "progress.isFinished")
+            
+            XCTAssertEqual(opQ.status, .idle)
+            
+            opQ.isSuspended = true
+            
+            XCTAssertEqual(opQ.status, .paused)
+            
+            opQ.isSuspended = false
+            
+            XCTAssertEqual(opQ.status, .idle)
         }
         
-        XCTAssertEqual(opQ.status, .idle)
-        
-        let completionBlockExp = expectation(description: "Operation Completion")
-        
-        opQ.addOperation {
-            usleep(100_000)
-            completionBlockExp.fulfill()
-        }
-        
-        switch opQ.status {
-        case .inProgress(let fractionCompleted, let label, let desc):
-            XCTAssertEqual(fractionCompleted, 0.0)
-            _ = label // don't test label content, for now
-            _ = desc // don't test desc content, for now
-        default:
-            XCTFail()
-        }
-        
-        wait(for: [completionBlockExp], timeout: 0.5)
-        wait(for: opQ.operationCount == 0, timeout: 0.5,
-             "operationCount == 0 check")
-        wait(for: opQ.progress.isFinished, timeout: 0.5,
-             "progress.isFinished check")
-        
-        XCTAssertEqual(opQ.status, .idle)
-        
-        opQ.isSuspended = true
-        
-        XCTAssertEqual(opQ.status, .paused)
-        
-        opQ.isSuspended = false
-        
-        XCTAssertEqual(opQ.status, .idle)
+        runTest(resetWhenFinished: false)
+        runTest(resetWhenFinished: true)
         
     }
     
