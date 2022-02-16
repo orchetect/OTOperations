@@ -56,7 +56,8 @@ final class BasicOperationQueue_Tests: XCTestCase {
         
         op = nil
         opQ.isSuspended = false
-        wait(for: opQ.lastAddedOperation == nil, timeout: 0.5)
+        wait(for: opQ.lastAddedOperation == nil, timeout: 0.5,
+             "lastAddedOperation == nil check")
         
     }
     
@@ -69,8 +70,10 @@ final class BasicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5)
-        wait(for: opQ.operationCount == 0, timeout: 0.5)
+        wait(for: opQ.status == .idle, timeout: 0.5,
+             "status == .idle check")
+        wait(for: opQ.operationCount == 0, timeout: 0.5,
+             "operationCount == 0 check")
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
         
@@ -78,8 +81,10 @@ final class BasicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5)
-        wait(for: opQ.operationCount == 0, timeout: 0.5)
+        wait(for: opQ.status == .idle, timeout: 0.5,
+             "status == .idle check")
+        wait(for: opQ.operationCount == 0, timeout: 0.5,
+             "operationCount == 0 check")
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 20 * 100)
         
@@ -164,9 +169,11 @@ final class BasicOperationQueue_Tests: XCTestCase {
                 XCTFail()
             }
             
-            wait(for: qTest.opQ.status == .idle, timeout: 1.5)
+            wait(for: qTest.opQ.status == .idle, timeout: 1.5,
+                 "status == .idle check")
             
-            wait(for: qTest.opQ.progress.totalUnitCount == 1, timeout: 1.0)
+            wait(for: qTest.opQ.progress.totalUnitCount == 1, timeout: 1.0,
+                 "totalUnitCount == 1 check")
             XCTAssertEqual(qTest.opQ.progress.completedUnitCount, 1)
             XCTAssertEqual(qTest.opQ.progress.totalUnitCount, 1)
             XCTAssertFalse(qTest.opQ.progress.isCancelled)
@@ -285,8 +292,10 @@ final class BasicOperationQueue_Tests: XCTestCase {
         }
         
         wait(for: [completionBlockExp], timeout: 0.5)
-        wait(for: opQ.operationCount == 0, timeout: 0.5)
-        wait(for: opQ.progress.isFinished, timeout: 0.5)
+        wait(for: opQ.operationCount == 0, timeout: 0.5,
+             "operationCount == 0 check")
+        wait(for: opQ.progress.isFinished, timeout: 0.5,
+             "progress.isFinished check")
         
         XCTAssertEqual(opQ.status, .idle)
         

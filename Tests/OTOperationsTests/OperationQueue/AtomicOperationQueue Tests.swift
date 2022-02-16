@@ -20,7 +20,8 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { $0.mutate { $0.append(val) } }
         }
         
-        wait(for: opQ.status == .idle, timeout: 1.0)
+        wait(for: opQ.status == .idle, timeout: 1.0,
+             "status == .idle check")
         //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
         //XCTAssertEqual(timeoutResult, .success)
         
@@ -43,7 +44,8 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { $0.mutate { $0.append(val) } }
         }
         
-        wait(for: opQ.status == .idle, timeout: 0.5)
+        wait(for: opQ.status == .idle, timeout: 0.5,
+             "status == .idle check")
         //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
         //XCTAssertEqual(timeoutResult, .success)
         
@@ -79,15 +81,20 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         XCTAssertEqual(opQ.operationCount, 100)
         XCTAssertTrue(opQ.isSuspended)
         
-        wait(for: opQ.status == .paused, timeout: 0.1)
+        wait(for: opQ.status == .paused, timeout: 0.1,
+             "status == .paused check")
         XCTAssertEqual(opQ.status, .paused)
         
         opQ.isSuspended = false
         
-        wait(for: (opQ.status != .paused && opQ.status != .idle), timeout: 0.2)
+        wait(for: opQ.status.isInProgress, timeout: 0.2,
+             "status.isInProgress check")
         
-        wait(for: opQ.operationCount == 0, timeout: 2.0)
-        wait(for: opQ.status == .idle, timeout: 0.5)
+        wait(for: opQ.operationCount == 0, timeout: 2.0,
+             "operationCount == 0 check")
+        
+        wait(for: opQ.status == .idle, timeout: 0.5,
+             "status == .idle check")
         XCTAssertEqual(opQ.status, .idle)
         
         XCTAssertEqual(opQ.sharedMutableValue.count, 100)
@@ -106,7 +113,8 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             opQ.addOperation { $0.mutate { $0.append(val) } }
         }
         
-        wait(for: opQ.status == .idle, timeout: 1.0)
+        wait(for: opQ.status == .idle, timeout: 1.0,
+             "status == .idle check")
         //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
         //XCTAssertEqual(timeoutResult, .success)
         
@@ -177,9 +185,11 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             XCTFail("Status is \(opQ.status)")
         }
         
-        wait(for: opQ.status == .idle, timeout: 5.0)
+        wait(for: opQ.status == .idle, timeout: 5.0,
+             "status == .idle check")
         
-        wait(for: opQ.progress.totalUnitCount == 1, timeout: 0.5)
+        wait(for: opQ.progress.totalUnitCount == 1, timeout: 0.5,
+             "totalUnitCount == 1 check")
         XCTAssertEqual(opQ.progress.totalUnitCount, 1)
         
     }

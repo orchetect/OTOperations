@@ -16,7 +16,10 @@ extension XCTestCase {
     public func wait(
         for condition: @autoclosure () -> Bool,
         timeout: TimeInterval,
-        polling: TimeInterval = 0.010
+        polling: TimeInterval = 0.010,
+        _ message: @autoclosure () -> String = "",
+        file: StaticString = #filePath,
+        line: UInt = #line
     ) {
         
         let inTime = Date()
@@ -41,7 +44,12 @@ extension XCTestCase {
         }
         
         if timedOut {
-            XCTFail("Timed out.")
+            var msg = message()
+            msg = msg.isEmpty ? "" : ": \(msg)"
+            
+            XCTFail("wait timed out\(msg)",
+                    file: file,
+                    line: line)
             return
         }
         
@@ -72,12 +80,15 @@ class Utilities_WaitForConditionTests: XCTestCase {
         
         var someString = "default string"
         
+        // note: this will throw a thread sanitizer warning but it's safe to ignore for this test
         DispatchQueue.global().async {
             usleep(20_000)
             someString = "new string"
         }
         
-        wait(for: someString == "new string", timeout: 0.3)
+        wait(for: someString == "new string",
+             timeout: 0.3,
+             "Check someString == 'new string'")
         
     }
     
