@@ -109,12 +109,11 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
         _ block: @escaping (_ atomicValue: VariableAccess) -> Void
     ) -> ClosureOperation {
         
-        let op = ClosureOperation { [weak self] in
+        let op = ClosureOperation(weight: weight) { [weak self] in
             guard let self = self else { return }
             let varAccess = VariableAccess(operationQueue: self)
             block(varAccess)
         }
-        op.progressWeight = weight
         return op
         
     }
@@ -128,12 +127,12 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
                             _ atomicValue: VariableAccess) -> Void
     ) -> InteractiveClosureOperation {
         
-        let op = InteractiveClosureOperation { [weak self] operation in
+        let op = InteractiveClosureOperation(weight: weight)
+        { [weak self] operation in
             guard let self = self else { return }
             let varAccess = VariableAccess(operationQueue: self)
             block(operation, varAccess)
         }
-        op.progressWeight = weight
         return op
         
     }
