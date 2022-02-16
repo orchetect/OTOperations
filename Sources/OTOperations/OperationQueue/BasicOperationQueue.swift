@@ -47,21 +47,12 @@ open class BasicOperationQueue: OperationQueue {
     
     /// Operation queue status.
     /// To observe changes to this value, supply a closure to the `statusHandler` property.
-    public internal(set) var status: OperationQueueStatus {
+    public private(set) var status: OperationQueueStatus {
         get {
             _status
         }
         set {
             let oldValue = _status
-            
-            // prevent .inProgress status if `done` is set
-            var newValue = newValue
-            if done {
-                if newValue != .idle && newValue != .paused {
-                    newValue = .idle
-                }
-            }
-            
             _status = newValue
             
             if newValue != oldValue {
@@ -264,8 +255,7 @@ open class BasicOperationQueue: OperationQueue {
                     status = .paused
                 } else {
                     if done ||
-                        progress.isFinished ||
-                        operationCount == 0
+                        progress.isFinished
                     {
                         setStatusIdle(resetProgress: resetProgressWhenFinished)
                     } else {
