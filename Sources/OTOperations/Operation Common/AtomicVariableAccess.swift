@@ -1,5 +1,5 @@
 //
-//  AtomicVariableAccess.swift
+//  AtomicOperationVariableAccess.swift
 //  OTOperations • https://github.com/orchetect/OTOperations
 //
 
@@ -7,23 +7,27 @@
 
 import Foundation
 
-/// Proxy object providing mutation access to an atomic variable.
-public class AtomicVariableAccess<T> {
+extension AtomicOperationQueue {
     
-    weak private var operationQueue: AtomicOperationQueue<T>?
-    
-    internal init(operationQueue: AtomicOperationQueue<T>) {
+    /// Proxy object providing mutation access to a thread-safe atomic variable.
+    public class VariableAccess {
         
-        self.operationQueue = operationQueue
+        weak private var operationQueue: AtomicOperationQueue<T>?
         
-    }
-    
-    /// Mutate the atomic variable in a closure.
-    /// Warning: Perform as little logic as possible and only use this closure to get or set the variable. Failure to do so may result in deadlocks in complex multi-threaded applications.
-    public func mutate(_ block: (_ value: inout T) -> Void) {
+        internal init(operationQueue: AtomicOperationQueue<T>) {
+            
+            self.operationQueue = operationQueue
+            
+        }
         
-        guard let operationQueue = operationQueue else { return }
-        block(&operationQueue.sharedMutableValue)
+        /// Mutate the atomic variable in a closure.
+        /// Warning: Perform as little logic as possible and only use this closure to get or set the variable. Failure to do so may result in deadlocks in complex multi-threaded applications.
+        public func mutate(_ block: (_ value: inout T) -> Void) {
+            
+            guard let operationQueue = operationQueue else { return }
+            block(&operationQueue.sharedMutableValue)
+            
+        }
         
     }
     
