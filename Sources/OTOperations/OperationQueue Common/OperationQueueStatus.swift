@@ -51,4 +51,18 @@ extension OperationQueueStatus: CustomStringConvertible {
     
 }
 
+// MARK: - Convenience Methods
+
+extension OperationQueueStatus {
+    
+    /// Returns `true` if case is `.inProgress`.
+    public var isInProgress: Bool {
+        
+        if case .inProgress = self { return true }
+        else { return false }
+        
+    }
+    
+}
+
 #endif
