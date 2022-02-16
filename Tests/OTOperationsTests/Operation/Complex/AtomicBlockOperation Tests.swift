@@ -486,8 +486,8 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         // TODO: it uses localizedDescription which may not always be English
         //                           [00] .idle
         //                           [01] .paused
-        XCTAssertEqual(qTest.statuses[02].inProgressDescription, "00% completed")
-        XCTAssertEqual(qTest.statuses[03].inProgressDescription, "05% completed")
+        XCTAssertEqual(qTest.statuses[02].inProgressDescription, "0% completed")
+        XCTAssertEqual(qTest.statuses[03].inProgressDescription, "5% completed")
         XCTAssertEqual(qTest.statuses[04].inProgressDescription, "10% completed")
         XCTAssertEqual(qTest.statuses[05].inProgressDescription, "15% completed")
         XCTAssertEqual(qTest.statuses[06].inProgressDescription, "20% completed")
