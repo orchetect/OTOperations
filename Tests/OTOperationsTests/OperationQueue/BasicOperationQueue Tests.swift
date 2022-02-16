@@ -118,7 +118,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
             for _ in 1...10 {
                 // pick random operation types to add,
                 // each taking the same amount of time to execute
-                switch (0...4).randomElement()! {
+                switch (0...3).randomElement()! {
                 case 0:
                     qTest.opQ.addOperation {
                         usleep(100_000)
@@ -142,17 +142,17 @@ final class BasicOperationQueue_Tests: XCTestCase {
                             operation.completeOperation()
                         }
                     )
-                case 4:
-                    qTest.opQ.addOperation(
-                        .atomicBlock(type: .concurrentAutomatic,
-                                     initialMutableValue: 0) { opBlock in
-                                         opBlock.addOperation { _ in
-                                             usleep(100_000)
-                                         }
-                                     }
-                    )
+                //case 4:
+                //    qTest.opQ.addOperation(
+                //        .atomicBlock(type: .concurrentAutomatic,
+                //                     initialMutableValue: 0) { opBlock in
+                //                         opBlock.addOperation { _ in
+                //                             usleep(100_000)
+                //                         }
+                //                     }
+                //    )
                 default:
-                    XCTFail()
+                    XCTFail() ; return
                 }
             }
             
@@ -166,10 +166,8 @@ final class BasicOperationQueue_Tests: XCTestCase {
             }
             
             wait(for: qTest.opQ.status, equals: .idle, timeout: 3.0)
-            
             wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 1.0)
-            XCTAssertEqual(qTest.opQ.progress.completedUnitCount, 1)
-            XCTAssertEqual(qTest.opQ.progress.totalUnitCount, 1)
+            wait(for: qTest.opQ.progress.completedUnitCount, equals: 1, timeout: 0.2)
             XCTAssertFalse(qTest.opQ.progress.isCancelled)
         }
         
