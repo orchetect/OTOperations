@@ -264,11 +264,17 @@ extension AtomicBlockOperation {
     /// - returns: The new operation.
     @discardableResult
     public final func addOperation(
+        label: String? = nil,
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         dependencies: [Operation] = [],
         _ block: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) -> ClosureOperation {
         
-        operationQueue.addOperation(dependencies: dependencies, block)
+        operationQueue.addOperation(
+            label: label,
+            weight: weight,
+            dependencies: dependencies, block
+        )
         
     }
     
@@ -278,17 +284,23 @@ extension AtomicBlockOperation {
     /// - returns: The new operation.
     @discardableResult
     public final func addInteractiveOperation(
+        label: String? = nil,
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         dependencies: [Operation] = [],
         _ block: @escaping (_ operation: InteractiveClosureOperation,
                             _ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) -> InteractiveClosureOperation {
         
-        operationQueue.addInteractiveOperation(dependencies: dependencies, block)
+        operationQueue.addInteractiveOperation(
+            label: label,
+            weight: weight,
+            dependencies: dependencies, block
+        )
         
     }
     
     /// Add an operation to the operation queue.
-    public final func addOperation(_ op: Operation){
+    public final func addOperation(_ op: Operation) {
         
         operationQueue.addOperation(op)
         
