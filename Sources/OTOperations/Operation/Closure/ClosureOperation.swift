@@ -43,10 +43,13 @@ public final class ClosureOperation: BasicOperation {
     public final var mainBlock: () -> Void
     
     public init(
+        label: String? = nil,
+        weight: OperationQueueProgressWeight = .default(),
         _ mainBlock: @escaping () -> Void
     ) {
         
         self.mainBlock = mainBlock
+        super.init(label: label, weight: weight)
         
     }
     

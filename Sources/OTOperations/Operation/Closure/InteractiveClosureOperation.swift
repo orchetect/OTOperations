@@ -54,10 +54,13 @@ public final class InteractiveClosureOperation: BasicOperation {
     public final var mainBlock: (_ operation: InteractiveClosureOperation) -> Void
     
     public init(
+        label: String? = nil,
+        weight: OperationQueueProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveClosureOperation) -> Void
     ) {
         
         self.mainBlock = mainBlock
+        super.init(label: label, weight: weight)
         
     }
     

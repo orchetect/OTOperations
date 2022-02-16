@@ -11,39 +11,42 @@ extension Operation {
     
     /// Convenience static constructor for `ClosureOperation`.
     public static func basic(
+        label: String? = nil,
         weight: OperationQueueProgressWeight = .default(),
         _ mainBlock: @escaping () -> Void
     ) -> ClosureOperation {
         
-        let op = ClosureOperation(mainBlock)
-        op.progressWeight = weight
-        return op
+        ClosureOperation(label: label,
+                         weight: weight,
+                         mainBlock)
         
     }
     
     /// Convenience static constructor for `InteractiveClosureOperation`.
     public static func interactive(
+        label: String? = nil,
         weight: OperationQueueProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveClosureOperation) -> Void
     ) -> InteractiveClosureOperation {
         
-        let op = InteractiveClosureOperation(mainBlock)
-        op.progressWeight = weight
-        return op
+        InteractiveClosureOperation(label: label,
+                                    weight: weight,
+                                    mainBlock)
         
     }
     
     /// Convenience static constructor for `InteractiveAsyncClosureOperation`.
     public static func interactiveAsync(
         on queue: DispatchQueue? = nil,
+        label: String? = nil,
         weight: OperationQueueProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveAsyncClosureOperation) -> Void
     ) -> InteractiveAsyncClosureOperation {
         
-        let op = InteractiveAsyncClosureOperation(on: queue,
-                                                  mainBlock)
-        op.progressWeight = weight
-        return op
+        InteractiveAsyncClosureOperation(on: queue,
+                                         label: label,
+                                         weight: weight,
+                                         mainBlock)
         
     }
     
@@ -52,13 +55,15 @@ extension Operation {
     public static func atomicBlock<T>(
         type operationQueueType: OperationQueueType,
         initialMutableValue: T,
+        label: String? = nil,
         weight: OperationQueueProgressWeight = .default(),
         _ setupBlock: ((_ operation: AtomicBlockOperation<T>) -> Void)? = nil
     ) -> AtomicBlockOperation<T> {
         
         let op = AtomicBlockOperation(type: operationQueueType,
+                                      label: label,
+                                      weight: weight,
                                       initialMutableValue: initialMutableValue)
-        op.progressWeight = weight
         
         if let setupBlock = setupBlock {
             op.setSetupBlock(setupBlock)

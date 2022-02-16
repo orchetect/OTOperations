@@ -115,9 +115,11 @@ open class AtomicBlockOperation<T>: BasicOperation {
     // MARK: - Init
     
     public init(type operationQueueType: OperationQueueType,
-                initialMutableValue: T,
                 qualityOfService: QualityOfService? = nil,
                 resetProgressWhenFinished: Bool = false,
+                label: String? = nil,
+                weight: OperationQueueProgressWeight = .default(),
+                initialMutableValue: T,
                 statusHandler: BasicOperationQueue.StatusHandler? = nil) {
         
         // assign properties
@@ -127,11 +129,14 @@ open class AtomicBlockOperation<T>: BasicOperation {
             initiallySuspended: true,
             resetProgressWhenFinished: resetProgressWhenFinished,
             initialMutableValue: initialMutableValue,
+            label: label,
             statusHandler: statusHandler
         )
         
         // super
-        super.init()
+        super.init(weight: weight)
+        
+        progressWeight = weight
         
         if let qualityOfService = qualityOfService {
             self.qualityOfService = qualityOfService

@@ -86,7 +86,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         opQ.isSuspended = false
         wait(for: (opQ.status != .paused && opQ.status != .idle), timeout: 0.2)
         
-        wait(for: opQ.status == .idle, timeout: 2.0)
+        wait(for: opQ.status == .idle, timeout: 3.0)
         XCTAssertEqual(opQ.status, .idle)
         
         XCTAssertEqual(opQ.sharedMutableValue.count, 100)
@@ -168,7 +168,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
         
         switch opQ.status {
-        case .inProgress(fractionCompleted: _, message: _):
+        case .inProgress:
             break // correct
         default:
             XCTFail()

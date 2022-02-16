@@ -73,17 +73,25 @@ open class BasicOperationQueue: OperationQueue {
     // MARK: - Progress Back-Porting
     
     @OTAtomicsThreadSafe
-    private var _progress: Progress = .discreteProgress(totalUnitCount: 0)
+    private var _progress: Progress = LabelProgress(totalUnitCount: 0)
     
     @available(macOS 10.9, iOS 7.0, tvOS 9.0, watchOS 2.0, *)
     @objc dynamic
     public override final var progress: Progress { _progress }
+    
+    /// Return `.progress` typed as `LabelProgress` in order to get or set label information.
+    public final var labelProgress: LabelProgress {
+        
+        progress as! LabelProgress
+        
+    }
     
     // MARK: - Init
     
     /// Set max concurrent operation count.
     /// Status handler is called async on the main thread.
     public init(type operationQueueType: OperationQueueType,
+                label: String? = nil,
                 resetProgressWhenFinished: Bool = false,
                 statusHandler: StatusHandler? = nil) {
         
@@ -92,6 +100,8 @@ open class BasicOperationQueue: OperationQueue {
         self.statusHandler = statusHandler
         
         super.init()
+        
+        self.labelProgress.label = label
         
         updateFromOperationQueueType()
         
@@ -249,7 +259,8 @@ open class BasicOperationQueue: OperationQueue {
                     } else {
                         status = .inProgress(
                             fractionCompleted: progress.fractionCompleted,
-                            message: progress.localizedDescription
+                            label: labelProgress.deepLabel,
+                            description: progress.localizedDescription
                         )
                         
                     }
@@ -271,7 +282,8 @@ open class BasicOperationQueue: OperationQueue {
                    operationCount > 0
                 {
                     status = .inProgress(fractionCompleted: progress.fractionCompleted,
-                                         message: progress.localizedDescription)
+                                         label: labelProgress.deepLabel,
+                                         description: progress.localizedDescription)
                 } else {
                     setStatusIdle(resetProgress: resetProgressWhenFinished)
                 }
@@ -296,7 +308,8 @@ open class BasicOperationQueue: OperationQueue {
                     setStatusIdle(resetProgress: resetProgressWhenFinished)
                 } else {
                     status = .inProgress(fractionCompleted: progress.fractionCompleted,
-                                         message: progress.localizedDescription)
+                                         label: labelProgress.deepLabel,
+                                         description: progress.localizedDescription)
                 }
             }
         )

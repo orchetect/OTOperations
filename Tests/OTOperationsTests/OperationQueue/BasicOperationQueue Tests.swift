@@ -95,6 +95,8 @@ final class BasicOperationQueue_Tests: XCTestCase {
                                            initialMutableValue: 0)
             
             init() {
+                opQ.labelProgress.label = "Main"
+                
                 opQ.statusHandler = { newStatus, oldStatus in
                     if self.statuses.isEmpty {
                         self.statuses.append(oldStatus)
@@ -156,7 +158,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
             XCTAssertEqual(ppQProgressTest.opQ.progress.totalUnitCount, 10 * 100)
             
             switch ppQProgressTest.opQ.status {
-            case .inProgress(fractionCompleted: _, message: _):
+            case .inProgress:
                 break // correct
             default:
                 XCTFail()
@@ -182,27 +184,27 @@ final class BasicOperationQueue_Tests: XCTestCase {
         
         XCTAssertEqual(ppQProgressTest.statuses, [
             .idle,
-            .inProgress(fractionCompleted: 0.0, message: "0% completed"),
-            .inProgress(fractionCompleted: 0.1, message: "10% completed"),
-            .inProgress(fractionCompleted: 0.2, message: "20% completed"),
-            .inProgress(fractionCompleted: 0.3, message: "30% completed"),
-            .inProgress(fractionCompleted: 0.4, message: "40% completed"),
-            .inProgress(fractionCompleted: 0.5, message: "50% completed"),
-            .inProgress(fractionCompleted: 0.6, message: "60% completed"),
-            .inProgress(fractionCompleted: 0.7, message: "70% completed"),
-            .inProgress(fractionCompleted: 0.8, message: "80% completed"),
-            .inProgress(fractionCompleted: 0.9, message: "90% completed"),
+            .inProgress(fractionCompleted: 0.0, label: "Main", description: "0% completed"),
+            .inProgress(fractionCompleted: 0.1, label: "Main", description: "10% completed"),
+            .inProgress(fractionCompleted: 0.2, label: "Main", description: "20% completed"),
+            .inProgress(fractionCompleted: 0.3, label: "Main", description: "30% completed"),
+            .inProgress(fractionCompleted: 0.4, label: "Main", description: "40% completed"),
+            .inProgress(fractionCompleted: 0.5, label: "Main", description: "50% completed"),
+            .inProgress(fractionCompleted: 0.6, label: "Main", description: "60% completed"),
+            .inProgress(fractionCompleted: 0.7, label: "Main", description: "70% completed"),
+            .inProgress(fractionCompleted: 0.8, label: "Main", description: "80% completed"),
+            .inProgress(fractionCompleted: 0.9, label: "Main", description: "90% completed"),
             .idle,
-            .inProgress(fractionCompleted: 0.0, message: "0% completed"),
-            .inProgress(fractionCompleted: 0.1, message: "10% completed"),
-            .inProgress(fractionCompleted: 0.2, message: "20% completed"),
-            .inProgress(fractionCompleted: 0.3, message: "30% completed"),
-            .inProgress(fractionCompleted: 0.4, message: "40% completed"),
-            .inProgress(fractionCompleted: 0.5, message: "50% completed"),
-            .inProgress(fractionCompleted: 0.6, message: "60% completed"),
-            .inProgress(fractionCompleted: 0.7, message: "70% completed"),
-            .inProgress(fractionCompleted: 0.8, message: "80% completed"),
-            .inProgress(fractionCompleted: 0.9, message: "90% completed"),
+            .inProgress(fractionCompleted: 0.0, label: "Main", description: "0% completed"),
+            .inProgress(fractionCompleted: 0.1, label: "Main", description: "10% completed"),
+            .inProgress(fractionCompleted: 0.2, label: "Main", description: "20% completed"),
+            .inProgress(fractionCompleted: 0.3, label: "Main", description: "30% completed"),
+            .inProgress(fractionCompleted: 0.4, label: "Main", description: "40% completed"),
+            .inProgress(fractionCompleted: 0.5, label: "Main", description: "50% completed"),
+            .inProgress(fractionCompleted: 0.6, label: "Main", description: "60% completed"),
+            .inProgress(fractionCompleted: 0.7, label: "Main", description: "70% completed"),
+            .inProgress(fractionCompleted: 0.8, label: "Main", description: "80% completed"),
+            .inProgress(fractionCompleted: 0.9, label: "Main", description: "90% completed"),
             .idle
         ])
         
@@ -226,9 +228,10 @@ final class BasicOperationQueue_Tests: XCTestCase {
         }
         
         switch opQ.status {
-        case .inProgress(let fractionCompleted, let message):
+        case .inProgress(let fractionCompleted, let label, let desc):
             XCTAssertEqual(fractionCompleted, 0.0)
-            _ = message // don't test message content, for now
+            _ = label // don't test label content, for now
+            _ = desc // don't test desc content, for now
         default:
             XCTFail()
         }

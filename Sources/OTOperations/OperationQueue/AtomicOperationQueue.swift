@@ -25,12 +25,14 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
         initiallySuspended: Bool = false,
         resetProgressWhenFinished: Bool = false,
         initialMutableValue: T,
+        label: String? = nil,
         statusHandler: BasicOperationQueue.StatusHandler? = nil
     ) {
         
         self.sharedMutableValue = initialMutableValue
         
         super.init(type: operationQueueType,
+                   label: label,
                    resetProgressWhenFinished: resetProgressWhenFinished,
                    statusHandler: statusHandler)
         

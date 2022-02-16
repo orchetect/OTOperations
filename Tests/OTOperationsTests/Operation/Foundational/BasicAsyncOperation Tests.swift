@@ -46,7 +46,7 @@ final class BasicAsyncOperation_Tests: XCTestCase {
         
         private let totalOpCount = 100
         
-        override init() {
+        init() {
             super.init()   
             progress.totalUnitCount = Int64(totalOpCount)
         }
