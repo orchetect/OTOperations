@@ -26,8 +26,10 @@ extension Progress {
         
         // keyPath "_children" also works
         let getChildren = value(forKeyPath: "children")
-        let typedChildren = getChildren as? Set<Progress>
-        return typedChildren ?? []
+        guard let nsSet = getChildren as? NSSet else { return [] }
+        let mappedChildren = nsSet.compactMap { $0 as? Progress }
+        let mappedSet = Set(mappedChildren)
+        return mappedSet
         
     }
     
