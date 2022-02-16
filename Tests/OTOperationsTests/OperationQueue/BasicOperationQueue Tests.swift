@@ -165,7 +165,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
                 XCTFail()
             }
             
-            wait(for: qTest.opQ.status, equals: .idle, timeout: 1.5)
+            wait(for: qTest.opQ.status, equals: .idle, timeout: 3.0)
             
             wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 1.0)
             XCTAssertEqual(qTest.opQ.progress.completedUnitCount, 1)
