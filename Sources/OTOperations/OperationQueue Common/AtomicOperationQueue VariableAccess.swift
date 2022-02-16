@@ -1,5 +1,5 @@
 //
-//  AtomicOperationVariableAccess.swift
+//  AtomicOperationQueue VariableAccess.swift
 //  OTOperations • https://github.com/orchetect/OTOperations
 //
 

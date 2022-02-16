@@ -12,7 +12,7 @@ extension Operation {
     /// Convenience static constructor for `ClosureOperation`.
     public static func basic(
         label: String? = nil,
-        weight: OperationQueueProgressWeight = .default(),
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping () -> Void
     ) -> ClosureOperation {
         
@@ -25,7 +25,7 @@ extension Operation {
     /// Convenience static constructor for `InteractiveClosureOperation`.
     public static func interactive(
         label: String? = nil,
-        weight: OperationQueueProgressWeight = .default(),
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveClosureOperation) -> Void
     ) -> InteractiveClosureOperation {
         
@@ -39,7 +39,7 @@ extension Operation {
     public static func interactiveAsync(
         on queue: DispatchQueue? = nil,
         label: String? = nil,
-        weight: OperationQueueProgressWeight = .default(),
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveAsyncClosureOperation) -> Void
     ) -> InteractiveAsyncClosureOperation {
         
@@ -56,7 +56,7 @@ extension Operation {
         type operationQueueType: OperationQueueType,
         initialMutableValue: T,
         label: String? = nil,
-        weight: OperationQueueProgressWeight = .default(),
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         _ setupBlock: ((_ operation: AtomicBlockOperation<T>) -> Void)? = nil
     ) -> AtomicBlockOperation<T> {
         

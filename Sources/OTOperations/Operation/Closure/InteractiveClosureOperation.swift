@@ -55,7 +55,7 @@ public final class InteractiveClosureOperation: BasicOperation {
     
     public init(
         label: String? = nil,
-        weight: OperationQueueProgressWeight = .default(),
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveClosureOperation) -> Void
     ) {
         

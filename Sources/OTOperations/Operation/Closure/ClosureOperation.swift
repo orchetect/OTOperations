@@ -44,7 +44,7 @@ public final class ClosureOperation: BasicOperation {
     
     public init(
         label: String? = nil,
-        weight: OperationQueueProgressWeight = .default(),
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping () -> Void
     ) {
         

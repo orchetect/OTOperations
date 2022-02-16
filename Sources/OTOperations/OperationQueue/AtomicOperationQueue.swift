@@ -54,7 +54,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     @discardableResult
     public final func addOperation(
         dependencies: [Operation] = [],
-        weight: OperationQueueProgressWeight = .default(),
+        weight: ProgressWeight = .default(),
         _ block: @escaping (_ atomicValue: VariableAccess) -> Void
     ) -> ClosureOperation {
         
@@ -72,7 +72,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     @discardableResult
     public final func addInteractiveOperation(
         dependencies: [Operation] = [],
-        weight: OperationQueueProgressWeight = .default(),
+        weight: ProgressWeight = .default(),
         _ block: @escaping (_ operation: InteractiveClosureOperation,
                             _ atomicValue: VariableAccess) -> Void
     ) -> InteractiveClosureOperation {
@@ -105,7 +105,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     /// Internal for debugging:
     /// Create an operation block operating on the shared mutable value.
     internal final func createOperation(
-        weight: OperationQueueProgressWeight = .default(),
+        weight: ProgressWeight = .default(),
         _ block: @escaping (_ atomicValue: VariableAccess) -> Void
     ) -> ClosureOperation {
         
@@ -123,7 +123,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     /// Create an operation block operating on the shared mutable value.
     /// `operation.mainShouldAbort()` can be periodically called and then early return if the operation may take more than a few seconds.
     internal final func createInteractiveOperation(
-        weight: OperationQueueProgressWeight = .default(),
+        weight: ProgressWeight = .default(),
         _ block: @escaping (_ operation: InteractiveClosureOperation,
                             _ atomicValue: VariableAccess) -> Void
     ) -> InteractiveClosureOperation {

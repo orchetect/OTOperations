@@ -118,7 +118,7 @@ open class AtomicBlockOperation<T>: BasicOperation {
                 qualityOfService: QualityOfService? = nil,
                 resetProgressWhenFinished: Bool = false,
                 label: String? = nil,
-                weight: OperationQueueProgressWeight = .default(),
+                weight: BasicOperationQueue.ProgressWeight = .default(),
                 initialMutableValue: T,
                 statusHandler: BasicOperationQueue.StatusHandler? = nil) {
         

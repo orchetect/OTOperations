@@ -72,7 +72,7 @@ public final class InteractiveAsyncClosureOperation: BasicAsyncOperation {
     public init(
         on queue: DispatchQueue? = nil,
         label: String? = nil,
-        weight: OperationQueueProgressWeight = .default(),
+        weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveAsyncClosureOperation) -> Void
     ) {
         

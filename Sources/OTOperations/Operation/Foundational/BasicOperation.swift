@@ -56,7 +56,7 @@ open class BasicOperation: Operation, ProgressReporting {
     }
     
     /// Progress weight when the operation is added to a `BasicOperationQueue` or one of its subclasses.
-    public var progressWeight: OperationQueueProgressWeight
+    public var progressWeight: BasicOperationQueue.ProgressWeight
     
     // MARK: - KVO
     
@@ -88,7 +88,7 @@ open class BasicOperation: Operation, ProgressReporting {
     }
     
     public init(label: String? = nil,
-                weight: OperationQueueProgressWeight = .default()) {
+                weight: BasicOperationQueue.ProgressWeight = .default()) {
         
         progressWeight = weight
         super.init()

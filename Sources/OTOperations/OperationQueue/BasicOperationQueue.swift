@@ -224,7 +224,7 @@ open class BasicOperationQueue: OperationQueue {
     
     /// Add an operation block.
     public final func addOperation(
-        weight: OperationQueueProgressWeight = .default(),
+        weight: ProgressWeight = .default(),
         _ block: @escaping () -> Void
     ) {
        
