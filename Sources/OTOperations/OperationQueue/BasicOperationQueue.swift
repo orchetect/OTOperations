@@ -119,6 +119,12 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
+            #if DEBUG
+            if !progress.children.isEmpty {
+                assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
+            }
+            #endif
+            
             progress.completedUnitCount = 0
             progress.totalUnitCount = 1
             resetTotalUnitCountNudge = true
@@ -178,6 +184,12 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
+            #if DEBUG
+            if !progress.children.isEmpty {
+                assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
+            }
+            #endif
+            
             progress.completedUnitCount = 0
             progress.totalUnitCount = 1
             resetTotalUnitCountNudge = true
@@ -257,7 +269,7 @@ open class BasicOperationQueue: OperationQueue {
                     if done ||
                         progress.isFinished
                     {
-                        setStatusIdle(resetProgress: resetProgressWhenFinished)
+                        setStatusIdle(resetProgress: false)
                     } else {
                         status = .inProgress(
                             fractionCompleted: progress.fractionCompleted,

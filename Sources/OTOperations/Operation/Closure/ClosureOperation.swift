@@ -7,6 +7,8 @@
 
 import Foundation
 
+// NOTE: when updating this inline docs block, copy it over to
+// `AtomicOperationQueue.addOperation()`
 /// A synchronous `Operation` subclass that provides essential boilerplate for building an operation and supplies a closure as a convenience when further subclassing is not necessary.
 ///
 /// This operation is synchronous. If the operation is run without being inserted into an `OperationQueue`, when you call the `start()` method the operation executes immediately in the current thread. By the time the `start()` method returns control, the operation is complete.

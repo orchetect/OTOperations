@@ -189,6 +189,7 @@ open class AtomicBlockOperation<T>: BasicOperation {
                 
                 if isCancelled {
                     operationQueue?.cancelAllOperations()
+                    progress.cancel()
                     completeOperation(dueToCancellation: true)
                 }
             }

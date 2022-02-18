@@ -121,7 +121,7 @@ final class ClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.isExecuting)
         // progress
         XCTAssertTrue(op.progress.isCancelled)
-        XCTAssertEqual(op.progress.fractionCompleted, 0.0)
+        XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
         
     }
