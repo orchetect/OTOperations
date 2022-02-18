@@ -119,9 +119,11 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
-            if !progress.children.isEmpty {
+            if let children = progress.value(forKeyPath: "children") as? NSMutableSet,
+               children.count > 0
+            {
                 // this is jank, but manually remove all children
-                progress.setValue(NSSet(), forKeyPath: "children")
+                children.removeAllObjects()
                 
                 //assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
             }
@@ -185,9 +187,11 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
-            if !progress.children.isEmpty {
+            if let children = progress.value(forKeyPath: "children") as? NSMutableSet,
+               children.count > 0
+            {
                 // this is jank, but manually remove all children
-                progress.setValue(NSSet(), forKeyPath: "children")
+                children.removeAllObjects()
                 
                 //assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
             }
