@@ -86,6 +86,57 @@ final class BasicOperationQueue_Tests: XCTestCase {
         
     }
     
+    func testResetProgressWhenFinished_True_CancelMidway() {
+        
+        class BasicOperationQueueResetTest {
+            let opQ = AtomicOperationQueue(type: .concurrentAutomatic,
+                                           resetProgressWhenFinished: true,
+                                           initialMutableValue: 0)
+            init() {
+                for _ in 1...10 {
+                    opQ.addOperation(.atomicBlock(type: .serialFIFO,
+                                                  initialMutableValue: 0) { operation in
+                        operation.addInteractiveOperation(label: nil) { operation, atomicValue in
+                            usleep(10_000 * UInt32.random(in: 1...10))
+                            if operation.mainShouldAbort() { return }
+                            usleep(10_000 * UInt32.random(in: 1...10))
+                            atomicValue.mutate { $0 += 1 }
+                            usleep(10_000 * UInt32.random(in: 1...10))
+                            operation.progress.completedUnitCount = 0
+                            operation.completeOperation()
+                        }
+                    })
+                    opQ.addInteractiveOperation(label: nil) { operation, atomicValue in
+                        usleep(10_000 * UInt32.random(in: 1...10))
+                        if operation.mainShouldAbort() { return }
+                        usleep(10_000 * UInt32.random(in: 1...10))
+                        atomicValue.mutate { $0 += 1 }
+                        usleep(10_000 * UInt32.random(in: 1...10))
+                        operation.progress.completedUnitCount = 0
+                        operation.completeOperation()
+                    }
+                }
+            }
+        }
+        
+        let qTest = BasicOperationQueueResetTest()
+        
+        XCTAssertGreaterThan(qTest.opQ.operationCount, 0)
+        
+        // wait until at least a few operations are complete
+        wait(for: qTest.opQ.status.inProgressFractionCompleted ?? -1 > 0.3, timeout: 1.0)
+        
+        // cancel operation queue
+        qTest.opQ.cancelAllOperations()
+        
+        // test that progress resets
+        wait(for: qTest.opQ.operationCount, equals: 0, timeout: 0.5)
+        wait(for: qTest.opQ.progress.isFinished, timeout: 0.5)
+        wait(for: qTest.opQ.progress.completedUnitCount, equals: 1, timeout: 0.5)
+        wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 0.5)
+        
+    }
+    
     func testResetProgressWhenFinished_True() {
         
         class AtomicOperationQueueProgressTest {
