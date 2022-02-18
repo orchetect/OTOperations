@@ -125,8 +125,11 @@ open class BasicOperationQueue: OperationQueue {
                 // this is jank, but manually remove all children
                 children
                     .allObjects
-                    .filter { $0 is LabelProgress }
-                    .forEach { children.remove($0) }
+                    .compactMap { $0 as? LabelProgress }
+                    .forEach {
+                        $0.setValue(nil, forKeyPath: "parent")
+                        children.remove($0)
+                    }
                 
                 //assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
             }
@@ -196,8 +199,11 @@ open class BasicOperationQueue: OperationQueue {
                 // this is jank, but manually remove all children
                 children
                     .allObjects
-                    .filter { $0 is LabelProgress }
-                    .forEach { children.remove($0) }
+                    .compactMap { $0 as? LabelProgress }
+                    .forEach {
+                        $0.setValue(nil, forKeyPath: "parent")
+                        children.remove($0)
+                    }
                 
                 //assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
             }
