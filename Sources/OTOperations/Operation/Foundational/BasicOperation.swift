@@ -130,9 +130,11 @@ open class BasicOperation: Operation, ProgressReporting {
         
         if isCancelled || dueToCancellation {
             progress.cancel()
-        } else {
-            progress.completedUnitCount = progress.totalUnitCount
         }
+        
+        // progress object MUST ALWAYS set completed == total, even if cancelled
+        // or it will not be released from its parent progress
+        progress.completedUnitCount = progress.totalUnitCount
         
         _isExecuting = false
         _isFinished = true
