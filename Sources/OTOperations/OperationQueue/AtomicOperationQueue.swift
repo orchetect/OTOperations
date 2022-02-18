@@ -48,6 +48,8 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     
     // MARK: - Shared Mutable Value Methods
     
+    // NOTE: when updating this inline docs block, copy it over to
+    // `class ClosureOperation)`
     /// A synchronous `Operation` subclass that provides essential boilerplate for building an operation and supplies a closure as a convenience when further subclassing is not necessary.
     ///
     /// This operation is synchronous. If the operation is run without being inserted into an `OperationQueue`, when you call the `start()` method the operation executes immediately in the current thread. By the time the `start()` method returns control, the operation is complete.
@@ -96,6 +98,8 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
             
     }
     
+    // NOTE: when updating this inline docs block, copy it over to
+    // `class InteractiveClosureOperation)`
     /// A synchronous `Operation` subclass that provides essential boilerplate for building an operation and supplies a closure as a convenience when further subclassing is not necessary.
     ///
     /// This operation is synchronous. If the operation is run without being inserted into an `OperationQueue`, when you call the `start()` method the operation executes immediately in the current thread. By the time the `start()` method returns control, the operation is complete.
