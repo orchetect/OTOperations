@@ -113,10 +113,9 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isCancelled)
         XCTAssertTrue(op.isExecuting)
         // progress
-        XCTAssertFalse(op.progress.isFinished)
+        XCTAssertTrue(op.progress.isFinished)
         XCTAssertTrue(op.progress.isCancelled)
-        XCTAssertEqual(op.progress.fractionCompleted, 0.0)
-        XCTAssertLessThan(op.progress.fractionCompleted, 1.0)
+        XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
         
     }
@@ -210,9 +209,9 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isCancelled)
         XCTAssertTrue(op.isExecuting) // still executing
         // progress - operation
-        XCTAssertFalse(op.progress.isFinished)
+        XCTAssertTrue(op.progress.isFinished)
         XCTAssertTrue(op.progress.isCancelled)
-        XCTAssertEqual(op.progress.fractionCompleted, 0.0)
+        XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
         // progress - queue
         XCTAssertTrue(opQ.progress.isFinished) // even if the async op is still running, this will be true now
