@@ -92,8 +92,13 @@ open class BasicOperation: Operation, ProgressReporting {
         
         progressWeight = weight
         super.init()
+        
         if label != nil { labelProgress.label = label }
         
+        progress.cancellationHandler = { [progress] in
+            // automatically set progress to finished state if cancelled
+            progress.completedUnitCount = progress.totalUnitCount
+        }
     }
     
     // MARK: - Method Overrides
@@ -128,7 +133,7 @@ open class BasicOperation: Operation, ProgressReporting {
     /// If returning early from the operation due to `isCancelled` being true, call this with the `dueToCancellation` flag set to `true` to update this operation's progress as cancelled.
     public final func completeOperation(dueToCancellation: Bool = false) {
         
-        if isCancelled || dueToCancellation {
+        if dueToCancellation {
             progress.cancel()
         }
         
@@ -149,6 +154,14 @@ open class BasicOperation: Operation, ProgressReporting {
             completeOperation(dueToCancellation: true)
         }
         return isCancelled
+        
+    }
+    
+    deinit {
+        
+        // progress object MUST ALWAYS set completed == total, even if cancelled
+        // or it will not be released from its parent progress
+        progress.completedUnitCount = progress.totalUnitCount
         
     }
     
