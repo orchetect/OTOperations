@@ -52,6 +52,11 @@
                BlueprintName = "OTOperationsTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "AtomicOperationQueue_Tests/testOp_concurrentAutomatic_Pause_Run()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

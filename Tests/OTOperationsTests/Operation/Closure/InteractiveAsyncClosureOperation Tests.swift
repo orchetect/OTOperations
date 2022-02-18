@@ -115,10 +115,9 @@ final class InteractiveAsyncClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
         // progress
-        XCTAssertFalse(op.progress.isFinished)
+        XCTAssertTrue(op.progress.isFinished)
         XCTAssertTrue(op.progress.isCancelled)
-        XCTAssertGreaterThan(op.progress.fractionCompleted, 0.0)
-        XCTAssertLessThan(op.progress.fractionCompleted, 1.0)
+        XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
         
     }
@@ -224,10 +223,9 @@ final class InteractiveAsyncClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
         // progress - operation
-        XCTAssertFalse(op.progress.isFinished)
+        XCTAssertTrue(op.progress.isFinished)
         XCTAssertTrue(op.progress.isCancelled)
-        XCTAssertGreaterThan(op.progress.fractionCompleted, 0.0)
-        XCTAssertLessThan(op.progress.fractionCompleted, 1.0)
+        XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
         // progress - queue
         XCTAssertTrue(opQ.progress.isFinished)

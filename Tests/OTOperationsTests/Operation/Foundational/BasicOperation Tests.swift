@@ -150,9 +150,9 @@ final class BasicOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
         // progress
-        XCTAssertFalse(op.progress.isFinished)
+        XCTAssertTrue(op.progress.isFinished)
         XCTAssertTrue(op.progress.isCancelled)
-        XCTAssertEqual(op.progress.fractionCompleted, 0.0)
+        XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
         
     }
