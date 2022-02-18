@@ -202,6 +202,20 @@ public class LabelProgress: Progress {
         
     }
     
+    deinit {
+        
+        // manually nil the label
+        setUserInfoObject(nil, forKey: .label)
+        
+        // notify the parent to update
+        if let parentProgress = labelProgressParent {
+            DispatchQueue.global().async {
+                parentProgress.updateUserInfoWithChildLabelsAndNotifyParent()
+            }
+        }
+        
+    }
+    
 }
 
 #endif
