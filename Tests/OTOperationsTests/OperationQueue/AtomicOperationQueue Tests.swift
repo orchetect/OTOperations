@@ -134,7 +134,8 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
             //XCTAssertEqual(timeoutResult, .success)
             
-            XCTAssertEqual(opQ.sharedMutableValue.count, 100)
+            wait(for: opQ.sharedMutableValue.count, equals: 100, timeout: 0.5)
+            
             // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
             XCTAssert(Array(1...100).allSatisfy(opQ.sharedMutableValue.contains))
             
