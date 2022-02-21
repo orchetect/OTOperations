@@ -33,6 +33,23 @@ extension Progress {
         
     }
     
+    /// Removes any child `LabelProgress` references manually and decouples them.
+    internal func purgeLabelProgressChildren() {
+        
+        guard let children = value(forKeyPath: "children") as? NSMutableSet,
+              children.count > 0
+        else { return }
+        
+        children
+            .allObjects
+            .compactMap { $0 as? LabelProgress }
+            .forEach {
+                $0.setValue(nil, forKeyPath: "parent")
+                children.remove($0)
+            }
+        
+    }
+    
 }
 
 #endif
