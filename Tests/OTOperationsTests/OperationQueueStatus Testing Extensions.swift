@@ -47,4 +47,59 @@ extension OperationQueueStatus {
     
 }
 
+extension OperationQueueStatus {
+    
+    enum Testable {
+        
+        /// Returns values as-is, except `inProgress` which returns only the `fractionCompleted` associated value.
+        enum FractionCompleted: Equatable, Hashable {
+            case idle
+            case paused
+            case inProgress(fractionCompleted: Double)
+        }
+        
+        /// Returns values as-is, except `inProgress` which returns only the `description` associated value.
+        enum Description: Equatable, Hashable {
+            case idle
+            case paused
+            case inProgress(description: String)
+        }
+        
+    }
+    
+}
+extension Collection where Element == OperationQueueStatus {
+    
+    func convertedToTestableFractionCompleted() -> [OperationQueueStatus.Testable.FractionCompleted] {
+        
+        map {
+            switch $0 {
+            case .idle:
+                return .idle
+            case .inProgress(let fractionCompleted, _, _):
+                return .inProgress(fractionCompleted: fractionCompleted)
+            case .paused:
+                return .paused
+            }
+        }
+        
+    }
+    
+    func convertedToTestableDescription() -> [OperationQueueStatus.Testable.Description] {
+        
+        map {
+            switch $0 {
+            case .idle:
+                return .idle
+            case .inProgress(_, _, let description):
+                return .inProgress(description: description)
+            case .paused:
+                return .paused
+            }
+        }
+        
+    }
+    
+}
+
 #endif

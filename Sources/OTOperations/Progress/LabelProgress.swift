@@ -92,18 +92,22 @@ public class LabelProgress: Progress {
     // MARK: - Helpers
     
     /// Introspects all 1st-generation child progress objects and caches their labels in this progress instance's `userInfo` dictionary.
-    private func updateUserInfoWithChildLabelsAndNotifyParent() {
+    internal func updateUserInfoWithChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
         
         let children = self.children as? Set<LabelProgress> ?? []
         
         autoreleasepool {
             // remove duplicates while maintaining NSSet order
             let labels: [String] = children
-                .compactMap { $0.userInfo[.label] as? String }
-                .reduce(into: []) { accum, element in
-                    if !accum.contains(element) {
-                        accum.append(element)
+                .compactMap { element -> String? in
+                    if incompleteOnly, (element.isFinished || element.isCancelled) {
+                       return nil
                     }
+                    return element.userInfo[.label] as? String
+                }
+                .reduce(into: []) { accum, element in
+                    guard !accum.contains(element) else { return }
+                    accum.append(element)
                 }
                 .sorted()
             
@@ -111,11 +115,15 @@ public class LabelProgress: Progress {
             
             // remove duplicates while maintaining NSSet order
             let combinedLabels: [String] = children
-                .compactMap { $0.userInfo[.combinedLabel] as? String }
-                .reduce(into: []) { accum, element in
-                    if !accum.contains(element) {
-                        accum.append(element)
+                .compactMap { element -> String? in
+                    if incompleteOnly, (element.isFinished || element.isCancelled) {
+                        return nil
                     }
+                    return element.userInfo[.combinedLabel] as? String
+                }
+                .reduce(into: []) { accum, element in
+                    guard !accum.contains(element) else { return }
+                    accum.append(element)
                 }
                 .sorted()
             

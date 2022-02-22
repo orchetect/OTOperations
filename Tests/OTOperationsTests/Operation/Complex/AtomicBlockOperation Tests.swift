@@ -459,55 +459,70 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         }
         wait(for: [runExp], timeout: 5.0)
         
-        XCTAssertEqual(qTest.statuses[00], .idle)
-        XCTAssertEqual(qTest.statuses[01], .paused)
-        XCTAssertEqual(qTest.statuses[02].inProgressFractionCompleted, 0.00)
-        XCTAssertEqual(qTest.statuses[03].inProgressFractionCompleted, 0.05)
-        XCTAssertEqual(qTest.statuses[04].inProgressFractionCompleted, 0.10)
-        XCTAssertEqual(qTest.statuses[05].inProgressFractionCompleted, 0.15)
-        XCTAssertEqual(qTest.statuses[06].inProgressFractionCompleted, 0.20)
-        XCTAssertEqual(qTest.statuses[07].inProgressFractionCompleted, 0.25)
-        XCTAssertEqual(qTest.statuses[08].inProgressFractionCompleted, 0.30)
-        XCTAssertEqual(qTest.statuses[09].inProgressFractionCompleted, 0.35)
-        XCTAssertEqual(qTest.statuses[10].inProgressFractionCompleted, 0.40)
-        XCTAssertEqual(qTest.statuses[11].inProgressFractionCompleted, 0.45)
-        XCTAssertEqual(qTest.statuses[12].inProgressFractionCompleted, 0.50)
-        XCTAssertEqual(qTest.statuses[13].inProgressFractionCompleted, 0.55)
-        XCTAssertEqual(qTest.statuses[14].inProgressFractionCompleted, 0.60)
-        XCTAssertEqual(qTest.statuses[15].inProgressFractionCompleted, 0.65)
-        XCTAssertEqual(qTest.statuses[16].inProgressFractionCompleted, 0.70)
-        XCTAssertEqual(qTest.statuses[17].inProgressFractionCompleted, 0.75)
-        XCTAssertEqual(qTest.statuses[18].inProgressFractionCompleted, 0.80)
-        XCTAssertEqual(qTest.statuses[19].inProgressFractionCompleted, 0.85)
-        XCTAssertEqual(qTest.statuses[20].inProgressFractionCompleted, 0.90)
-        XCTAssertEqual(qTest.statuses[21].inProgressFractionCompleted, 0.95)
-        XCTAssertEqual(qTest.statuses[22], .idle)
+        // remove sequential duplicates in order to test, since operations
+        // completing will trigger a statusHandler callback when labels
+        // change even if progress percentage has not changed
+        let reducedStatusFC = qTest.statuses
+            .convertedToTestableFractionCompleted()
+            .removingSequentialDuplicates()
+        
+        XCTAssertEqual(reducedStatusFC[00], .idle)
+        XCTAssertEqual(reducedStatusFC[01], .paused)
+        XCTAssertEqual(reducedStatusFC[02], .inProgress(fractionCompleted: 0.00))
+        XCTAssertEqual(reducedStatusFC[03], .inProgress(fractionCompleted: 0.05))
+        XCTAssertEqual(reducedStatusFC[04], .inProgress(fractionCompleted: 0.10))
+        XCTAssertEqual(reducedStatusFC[05], .inProgress(fractionCompleted: 0.15))
+        XCTAssertEqual(reducedStatusFC[06], .inProgress(fractionCompleted: 0.20))
+        XCTAssertEqual(reducedStatusFC[07], .inProgress(fractionCompleted: 0.25))
+        XCTAssertEqual(reducedStatusFC[08], .inProgress(fractionCompleted: 0.30))
+        XCTAssertEqual(reducedStatusFC[09], .inProgress(fractionCompleted: 0.35))
+        XCTAssertEqual(reducedStatusFC[10], .inProgress(fractionCompleted: 0.40))
+        XCTAssertEqual(reducedStatusFC[11], .inProgress(fractionCompleted: 0.45))
+        XCTAssertEqual(reducedStatusFC[12], .inProgress(fractionCompleted: 0.50))
+        XCTAssertEqual(reducedStatusFC[13], .inProgress(fractionCompleted: 0.55))
+        XCTAssertEqual(reducedStatusFC[14], .inProgress(fractionCompleted: 0.60))
+        XCTAssertEqual(reducedStatusFC[15], .inProgress(fractionCompleted: 0.65))
+        XCTAssertEqual(reducedStatusFC[16], .inProgress(fractionCompleted: 0.70))
+        XCTAssertEqual(reducedStatusFC[17], .inProgress(fractionCompleted: 0.75))
+        XCTAssertEqual(reducedStatusFC[18], .inProgress(fractionCompleted: 0.80))
+        XCTAssertEqual(reducedStatusFC[19], .inProgress(fractionCompleted: 0.85))
+        XCTAssertEqual(reducedStatusFC[20], .inProgress(fractionCompleted: 0.90))
+        XCTAssertEqual(reducedStatusFC[21], .inProgress(fractionCompleted: 0.95))
+        XCTAssertEqual(reducedStatusFC[22], .idle)
         
         // TODO: probably shouldn't test inProgress description since it's brittle;
         // TODO: it uses localizedDescription which may not always be English
-        //                           [00] .idle
-        //                           [01] .paused
-        XCTAssertEqual(qTest.statuses[02].inProgressDescription, "0% completed")
-        XCTAssertEqual(qTest.statuses[03].inProgressDescription, "5% completed")
-        XCTAssertEqual(qTest.statuses[04].inProgressDescription, "10% completed")
-        XCTAssertEqual(qTest.statuses[05].inProgressDescription, "15% completed")
-        XCTAssertEqual(qTest.statuses[06].inProgressDescription, "20% completed")
-        XCTAssertEqual(qTest.statuses[07].inProgressDescription, "25% completed")
-        XCTAssertEqual(qTest.statuses[08].inProgressDescription, "30% completed")
-        XCTAssertEqual(qTest.statuses[09].inProgressDescription, "35% completed")
-        XCTAssertEqual(qTest.statuses[10].inProgressDescription, "40% completed")
-        XCTAssertEqual(qTest.statuses[11].inProgressDescription, "45% completed")
-        XCTAssertEqual(qTest.statuses[12].inProgressDescription, "50% completed")
-        XCTAssertEqual(qTest.statuses[13].inProgressDescription, "55% completed")
-        XCTAssertEqual(qTest.statuses[14].inProgressDescription, "60% completed")
-        XCTAssertEqual(qTest.statuses[15].inProgressDescription, "65% completed")
-        XCTAssertEqual(qTest.statuses[16].inProgressDescription, "70% completed")
-        XCTAssertEqual(qTest.statuses[17].inProgressDescription, "75% completed")
-        XCTAssertEqual(qTest.statuses[18].inProgressDescription, "80% completed")
-        XCTAssertEqual(qTest.statuses[19].inProgressDescription, "85% completed")
-        XCTAssertEqual(qTest.statuses[20].inProgressDescription, "90% completed")
-        XCTAssertEqual(qTest.statuses[21].inProgressDescription, "95% completed")
-        //                           [22] .idle
+        
+        // remove sequential duplicates in order to test, since operations
+        // completing will trigger a statusHandler callback when labels
+        // change even if progress percentage has not changed
+        let reducedStatusDesc = qTest.statuses
+            .convertedToTestableDescription()
+            .removingSequentialDuplicates()
+        
+        XCTAssertEqual(reducedStatusDesc[00], .idle)
+        XCTAssertEqual(reducedStatusDesc[01], .paused)
+        XCTAssertEqual(reducedStatusDesc[02], .inProgress(description: "0% completed"))
+        XCTAssertEqual(reducedStatusDesc[03], .inProgress(description: "5% completed"))
+        XCTAssertEqual(reducedStatusDesc[04], .inProgress(description: "10% completed"))
+        XCTAssertEqual(reducedStatusDesc[05], .inProgress(description: "15% completed"))
+        XCTAssertEqual(reducedStatusDesc[06], .inProgress(description: "20% completed"))
+        XCTAssertEqual(reducedStatusDesc[07], .inProgress(description: "25% completed"))
+        XCTAssertEqual(reducedStatusDesc[08], .inProgress(description: "30% completed"))
+        XCTAssertEqual(reducedStatusDesc[09], .inProgress(description: "35% completed"))
+        XCTAssertEqual(reducedStatusDesc[10], .inProgress(description: "40% completed"))
+        XCTAssertEqual(reducedStatusDesc[11], .inProgress(description: "45% completed"))
+        XCTAssertEqual(reducedStatusDesc[12], .inProgress(description: "50% completed"))
+        XCTAssertEqual(reducedStatusDesc[13], .inProgress(description: "55% completed"))
+        XCTAssertEqual(reducedStatusDesc[14], .inProgress(description: "60% completed"))
+        XCTAssertEqual(reducedStatusDesc[15], .inProgress(description: "65% completed"))
+        XCTAssertEqual(reducedStatusDesc[16], .inProgress(description: "70% completed"))
+        XCTAssertEqual(reducedStatusDesc[17], .inProgress(description: "75% completed"))
+        XCTAssertEqual(reducedStatusDesc[18], .inProgress(description: "80% completed"))
+        XCTAssertEqual(reducedStatusDesc[19], .inProgress(description: "85% completed"))
+        XCTAssertEqual(reducedStatusDesc[20], .inProgress(description: "90% completed"))
+        XCTAssertEqual(reducedStatusDesc[21], .inProgress(description: "95% completed"))
+        XCTAssertEqual(reducedStatusDesc[22], .idle)
         
     }
     
