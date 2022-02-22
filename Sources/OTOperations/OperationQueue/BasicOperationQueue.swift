@@ -119,7 +119,7 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
-            progress.purgeLabelProgressChildren()
+            labelProgress.purgeLabelProgressChildren()
             progress.completedUnitCount = 0
             progress.totalUnitCount = 1
             resetTotalUnitCountNudge = true
@@ -179,7 +179,7 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
-            progress.purgeLabelProgressChildren()
+            labelProgress.purgeLabelProgressChildren()
             progress.completedUnitCount = 0
             progress.totalUnitCount = 1
             resetTotalUnitCountNudge = true
