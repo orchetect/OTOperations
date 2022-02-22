@@ -92,7 +92,7 @@ public class LabelProgress: Progress {
     // MARK: - Helpers
     
     /// Introspects all 1st-generation child progress objects and caches their labels in this progress instance's `userInfo` dictionary.
-    private func updateUserInfoWithChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
+    internal func updateUserInfoWithChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
         
         let children = self.children as? Set<LabelProgress> ?? []
         

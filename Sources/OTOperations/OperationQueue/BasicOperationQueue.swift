@@ -281,6 +281,8 @@ open class BasicOperationQueue: OperationQueue {
                 
                 done = operationCount == 0
                 
+                labelProgress.updateUserInfoWithChildLabelsAndNotifyParent()
+                
                 guard !isSuspended else { return }
 
                 if !done,
