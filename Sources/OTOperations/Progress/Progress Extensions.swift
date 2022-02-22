@@ -85,11 +85,10 @@ extension LabelProgress {
         
         autoreleasepool {
             guard let getValue = value(forKeyPath: "children"),
-                  var progressChildren = getValue as? Set<Progress>,
-                  progressChildren.count > 0
+                  let nsSet = getValue as? NSMutableSet
             else { return }
             
-            let typedChildren = progressChildren.compactMap { $0 as? LabelProgress }
+            let typedChildren = nsSet.compactMap { $0 as? LabelProgress }
             
             guard typedChildren.count > 0
             else { return }
@@ -105,7 +104,7 @@ extension LabelProgress {
                     $0.setValue(nil, forKeyPath: "parent")
                     
                     // remove child ref from parent
-                    progressChildren.remove($0)
+                    nsSet.remove($0)
                 }
         }
         
