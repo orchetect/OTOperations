@@ -96,29 +96,31 @@ public class LabelProgress: Progress {
         
         let children = self.children as? Set<LabelProgress> ?? []
         
-        // remove duplicates while maintaining NSSet order
-        let labels: [String] = children
-            .compactMap { $0.userInfo[.label] as? String }
-            .reduce(into: []) { accum, element in
-                if !accum.contains(element) {
-                    accum.append(element)
+        autoreleasepool {
+            // remove duplicates while maintaining NSSet order
+            let labels: [String] = children
+                .compactMap { $0.userInfo[.label] as? String }
+                .reduce(into: []) { accum, element in
+                    if !accum.contains(element) {
+                        accum.append(element)
+                    }
                 }
-            }
-            .sorted()
-        
-        setUserInfoObject(labels, forKey: .childLabels)
-        
-        // remove duplicates while maintaining NSSet order
-        let combinedLabels: [String] = children
-            .compactMap { $0.userInfo[.combinedLabel] as? String }
-            .reduce(into: []) { accum, element in
-                if !accum.contains(element) {
-                    accum.append(element)
+                .sorted()
+            
+            setUserInfoObject(labels, forKey: .childLabels)
+            
+            // remove duplicates while maintaining NSSet order
+            let combinedLabels: [String] = children
+                .compactMap { $0.userInfo[.combinedLabel] as? String }
+                .reduce(into: []) { accum, element in
+                    if !accum.contains(element) {
+                        accum.append(element)
+                    }
                 }
-            }
-            .sorted()
-        
-        setUserInfoObject(combinedLabels, forKey: .deepLabels)
+                .sorted()
+            
+            setUserInfoObject(combinedLabels, forKey: .deepLabels)
+        }
         
         updateUserInfoWithCombinedLabel()
         

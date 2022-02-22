@@ -119,21 +119,7 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
-            if let children = progress.value(forKeyPath: "children") as? NSMutableSet,
-               children.count > 0
-            {
-                // this is jank, but manually remove all children
-                children
-                    .allObjects
-                    .compactMap { $0 as? LabelProgress }
-                    .forEach {
-                        $0.setValue(nil, forKeyPath: "parent")
-                        children.remove($0)
-                    }
-                
-                //assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
-            }
-            
+            labelProgress.purgeLabelProgressChildren()
             progress.completedUnitCount = 0
             progress.totalUnitCount = 1
             resetTotalUnitCountNudge = true
@@ -193,21 +179,7 @@ open class BasicOperationQueue: OperationQueue {
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
-            if let children = progress.value(forKeyPath: "children") as? NSMutableSet,
-               children.count > 0
-            {
-                // this is jank, but manually remove all children
-                children
-                    .allObjects
-                    .compactMap { $0 as? LabelProgress }
-                    .forEach {
-                        $0.setValue(nil, forKeyPath: "parent")
-                        children.remove($0)
-                    }
-                
-                //assertionFailure("operationCount is 0 but progress children is not empty - possible retain cycle")
-            }
-            
+            labelProgress.purgeLabelProgressChildren()
             progress.completedUnitCount = 0
             progress.totalUnitCount = 1
             resetTotalUnitCountNudge = true
