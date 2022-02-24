@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreFoundation
+import OTAtomics
 
 /// A `Progress` subclass that supports a custom label and automatically aggregates labels from child progress objects.
 public class LabelProgress: Progress {
@@ -44,11 +45,13 @@ public class LabelProgress: Progress {
         }
     }
     
+    @OTAtomicsThreadSafe
     private var _label: String?
     
     /// Custom label (user-readable description) that combines the current instance's label with the labels of direct children only.
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
+    @OTAtomicsThreadSafe
     public private(set) var combinedLabel: String?
     
     private func generateCombinedLabel() {
@@ -65,6 +68,7 @@ public class LabelProgress: Progress {
     /// Custom label (user-readable description) that combines the current instance's label with the labels of all nested children.
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
+    @OTAtomicsThreadSafe
     public private(set) var deepLabel: String? = nil
     
     private func generateDeepLabel() {
@@ -81,13 +85,16 @@ public class LabelProgress: Progress {
     /// Returns an array of the labels of direct children only (not nested children).
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
+    @OTAtomicsThreadSafe
     public private(set) var childLabels: [String] = []
     
+    @OTAtomicsThreadSafe
     private var combinedLabels: [String] = []
     
     /// Returns an array of the labels of all nested children.
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
+    @OTAtomicsThreadSafe
     public private(set) var deepLabels: [String] = []
     
     // MARK: - Helpers

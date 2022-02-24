@@ -118,17 +118,17 @@ final class ProgressExtensions_Tests: XCTestCase {
             // complete the children
             foo.child1!.completedUnitCount = foo.child1!.totalUnitCount
             foo.child2!.completedUnitCount = foo.child2!.totalUnitCount
-            
-            // ensure parent deallocates and has no strong references remaining in memory
-            
-            XCTAssertNil(foo.child1)
-            XCTAssertNil(foo.child1?.parent)
-            XCTAssertNil(foo.child2)
-            XCTAssertNil(foo.child2?.parent)
-            
-            masterRef = foo.master
-            foo = nil
         }
+        
+        // ensure parent deallocates and has no strong references remaining in memory
+        
+        XCTAssertNil(foo.child1)
+        XCTAssertNil(foo.child1?.parent)
+        XCTAssertNil(foo.child2)
+        XCTAssertNil(foo.child2?.parent)
+        
+        masterRef = foo.master
+        foo = nil
         
         XCTAssertNil(masterRef)
         
@@ -143,22 +143,20 @@ final class ProgressExtensions_Tests: XCTestCase {
         }
         
         var foo: Foo!
-        weak var captureMaster: Progress?
+        weak var masterRef: Progress?
         
         autoreleasepool {
             foo = Foo()
             
-            do {
-                let newChild1 = Progress(totalUnitCount: 10,
-                                         parent: foo.master,
-                                         pendingUnitCount: 10)
-                foo.child1 = newChild1
-                
-                let newChild2 = Progress(totalUnitCount: 10,
-                                         parent: foo.master,
-                                         pendingUnitCount: 10)
-                foo.child2 = newChild2
-            }
+            let newChild1 = Progress(totalUnitCount: 10,
+                                     parent: foo.master,
+                                     pendingUnitCount: 10)
+            foo.child1 = newChild1
+            
+            let newChild2 = Progress(totalUnitCount: 10,
+                                     parent: foo.master,
+                                     pendingUnitCount: 10)
+            foo.child2 = newChild2
             
             XCTAssertNotNil(foo.child1)
             XCTAssertNotNil(foo.child2)
@@ -167,30 +165,28 @@ final class ProgressExtensions_Tests: XCTestCase {
             XCTAssertEqual(foo.master.children.count, 2)
             XCTAssertEqual(foo.master.children, [foo.child1, foo.child2])
             
-            do {
-                let strongChild1 = foo.child1!
-                let strongChild2 = foo.child2!
-                
-                // manually remove children
-                let purgedCount = foo.master.purgeChildren()
-                
-                XCTAssertEqual(purgedCount, 2)
-                XCTAssertEqual(foo.master.children.count, 0)
-                
-                XCTAssertNil(strongChild1.parent)
-                XCTAssertNil(strongChild2.parent)
-            }
+            let strongChild1 = foo.child1!
+            let strongChild2 = foo.child2!
             
-            // weak vars finally release after last strong ref disappears
-            XCTAssertNil(foo.child1)
-            XCTAssertNil(foo.child2)
+            // manually remove children
+            let purgedCount = foo.master.purgeChildren()
             
-            captureMaster = foo.master
-            foo.master = nil
+            XCTAssertEqual(purgedCount, 2)
+            XCTAssertEqual(foo.master.children.count, 0)
+            
+            XCTAssertNil(strongChild1.parent)
+            XCTAssertNil(strongChild2.parent)
         }
         
+        // weak vars finally release after last strong ref disappears
+        XCTAssertNil(foo.child1)
+        XCTAssertNil(foo.child2)
+        
+        masterRef = foo.master
+        foo = nil
+        
         // check that the parent releases
-        XCTAssertNil(captureMaster)
+        XCTAssertNil(masterRef)
         
     }
     
@@ -203,20 +199,18 @@ final class ProgressExtensions_Tests: XCTestCase {
         }
         
         var foo: Foo!
-        weak var captureMaster: LabelProgress?
+        weak var masterRef: LabelProgress?
         
         autoreleasepool {
             foo = Foo()
             
-            do {
-                let newChild1 = LabelProgress(totalUnitCount: 10)
-                foo.master.addChild(newChild1, withPendingUnitCount: 10)
-                foo.child1 = newChild1
-                
-                let newChild2 = LabelProgress(totalUnitCount: 10)
-                foo.master.addChild(newChild2, withPendingUnitCount: 10)
-                foo.child2 = newChild2
-            }
+            let newChild1 = LabelProgress(totalUnitCount: 10)
+            foo.master.addChild(newChild1, withPendingUnitCount: 10)
+            foo.child1 = newChild1
+            
+            let newChild2 = LabelProgress(totalUnitCount: 10)
+            foo.master.addChild(newChild2, withPendingUnitCount: 10)
+            foo.child2 = newChild2
             
             XCTAssertNotNil(foo.child1)
             XCTAssertNotNil(foo.child2)
@@ -225,30 +219,28 @@ final class ProgressExtensions_Tests: XCTestCase {
             XCTAssertEqual(foo.master.children.count, 2)
             XCTAssertEqual(foo.master.children, [foo.child1, foo.child2])
             
-            do {
-                let strongChild1 = foo.child1!
-                let strongChild2 = foo.child2!
-                
-                // manually remove children
-                let purgedCount = foo.master.purgeLabelProgressChildren()
-                
-                XCTAssertEqual(purgedCount, 2)
-                XCTAssertEqual(foo.master.children.count, 0)
-                
-                XCTAssertNil(strongChild1.parent)
-                XCTAssertNil(strongChild2.parent)
-            }
+            let strongChild1 = foo.child1!
+            let strongChild2 = foo.child2!
             
-            // weak vars finally release after last strong ref disappears
-            XCTAssertNil(foo.child1)
-            XCTAssertNil(foo.child2)
+            // manually remove children
+            let purgedCount = foo.master.purgeLabelProgressChildren()
             
-            captureMaster = foo.master
-            foo.master = nil
+            XCTAssertEqual(purgedCount, 2)
+            XCTAssertEqual(foo.master.children.count, 0)
+            
+            XCTAssertNil(strongChild1.parent)
+            XCTAssertNil(strongChild2.parent)
         }
         
+        // weak vars finally release after last strong ref disappears
+        XCTAssertNil(foo.child1)
+        XCTAssertNil(foo.child2)
+        
+        masterRef = foo.master
+        foo = nil
+        
         // check that the parent releases
-        XCTAssertNil(captureMaster)
+        XCTAssertNil(masterRef)
         
     }
     
