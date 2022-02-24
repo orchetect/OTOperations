@@ -25,25 +25,18 @@ public class LabelProgress: Progress {
     /// Set this property to set this progress instance's label, or set to nil to remove the label if one was set.
     public var label: String? {
         get {
-            autoreleasepool {
-                let getVal = userInfo[.label]
-                let asString = getVal as? String
-                return asString
-            }
+            _label
         }
         set {
-            let oldValue = autoreleasepool { () -> String? in
-                let getOldVal = userInfo[.label]
-                let asString = getOldVal as? String
-                return asString
-            }
+            let oldValue = _label
             
             if newValue?.isEmpty == true {
-                setUserInfoObject(nil, forKey: .label)
+                _label = nil
             } else {
-                setUserInfoObject(newValue, forKey: .label)
+                _label = newValue
             }
-            updateUserInfoWithCombinedLabel()
+            
+            generateLabels()
             
             if newValue != oldValue {
                 notifyParentToUpdateChildren()
@@ -51,120 +44,98 @@ public class LabelProgress: Progress {
         }
     }
     
+    private var _label: String?
+    
     /// Custom label (user-readable description) that combines the current instance's label with the labels of direct children only.
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
-    public var combinedLabel: String? {
+    public private(set) var combinedLabel: String?
+    
+    private func generateCombinedLabel() {
         
         var out = label
         let getChildLabels = childLabels.joined(separator: ", ")
         if !getChildLabels.isEmpty {
             out = out == nil ? getChildLabels : out! + " - " + getChildLabels
         }
-        return out
+        combinedLabel = out
         
     }
     
     /// Custom label (user-readable description) that combines the current instance's label with the labels of all nested children.
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
-    public var deepLabel: String? {
+    public private(set) var deepLabel: String? = nil
+    
+    private func generateDeepLabel() {
         
         var out = label
         let getChildLabels = deepLabels.joined(separator: ", ")
         if !getChildLabels.isEmpty {
             out = out == nil ? getChildLabels : out! + " - " + getChildLabels
         }
-        return out
+        deepLabel = out
         
     }
     
     /// Returns an array of the labels of direct children only (not nested children).
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
-    public var childLabels: [String] {
-        
-        autoreleasepool {
-            let getVal = userInfo[.childLabels]
-            let asString = getVal as? [String]
-            return asString ?? []
-        }
-        
-    }
+    public private(set) var childLabels: [String] = []
+    
+    private var combinedLabels: [String] = []
     
     /// Returns an array of the labels of all nested children.
     ///
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
-    public var deepLabels: [String] {
-        
-        autoreleasepool {
-            let getVal = userInfo[.deepLabels]
-            let asString = getVal as? [String]
-            return asString ?? []
-        }
-        
-    }
+    public private(set) var deepLabels: [String] = []
     
     // MARK: - Helpers
     
-    /// Introspects all 1st-generation child progress objects and caches their labels in this progress instance's `userInfo` dictionary.
-    internal func updateUserInfoWithChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
+    /// Introspects all 1st-generation child progress objects and caches their labels.
+    internal func updateChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
         
-        let children = self.children.compactMap { $0 as? LabelProgress }
+        let children = labelProgressChildren
         
-        autoreleasepool {
-            // remove duplicates while maintaining NSSet order
-            let labels: [String] = children
-                .compactMap { element -> String? in
-                    if incompleteOnly, (element.isFinished || element.isCancelled) {
-                       return nil
-                    }
-                    let getVal = element.userInfo[.label]
-                    let asString = getVal as? String
-                    return asString
+        // remove duplicates while maintaining NSSet order
+        let labels: [String] = children
+            .compactMap { element -> String? in
+                if incompleteOnly, (element.isFinished || element.isCancelled) {
+                    return nil
                 }
-                .reduce(into: []) { accum, element in
-                    guard !accum.contains(element) else { return }
-                    accum.append(element)
-                }
-                .sorted()
-            
-            setUserInfoObject(labels, forKey: .childLabels)
-            
-            // remove duplicates while maintaining NSSet order
-            let combinedLabels: [String] = children
-                .compactMap { element -> String? in
-                    if incompleteOnly, (element.isFinished || element.isCancelled) {
-                        return nil
-                    }
-                    let getVal = element.userInfo[.combinedLabel]
-                    let asString = getVal as? String
-                    return asString
-                }
-                .reduce(into: []) { accum, element in
-                    guard !accum.contains(element) else { return }
-                    accum.append(element)
-                }
-                .sorted()
-            
-            setUserInfoObject(combinedLabels, forKey: .deepLabels)
-        }
+                return element.label
+            }
+            .removingDuplicatesSorted()
         
-        updateUserInfoWithCombinedLabel()
+        self.childLabels = labels
         
+        // remove duplicates while maintaining NSSet order
+        let combinedLabels: [String] = children
+            .compactMap { element -> String? in
+                if incompleteOnly, (element.isFinished || element.isCancelled) {
+                    return nil
+                }
+                return element.deepLabel
+            }
+            .removingDuplicatesSorted()
+        
+        self.deepLabels = combinedLabels
+        
+        generateLabels()
         notifyParentToUpdateChildren()
         
     }
     
-    private func updateUserInfoWithCombinedLabel() {
+    private func generateLabels() {
         
-        setUserInfoObject(deepLabel, forKey: .combinedLabel)
+        generateCombinedLabel()
+        generateDeepLabel()
         
     }
     
     private func notifyParentToUpdateChildren() {
         
-        labelProgressParent?.updateUserInfoWithChildLabelsAndNotifyParent()
+        labelProgressParent?.updateChildLabelsAndNotifyParent()
         
     }
     
@@ -228,25 +199,25 @@ public class LabelProgress: Progress {
         
         super.addChild(child,
                        withPendingUnitCount: inUnitCount)
-        updateUserInfoWithChildLabelsAndNotifyParent()
+        updateChildLabelsAndNotifyParent()
         
     }
     
-    // note: disabling this in 1.0.4 as a test to avoid potential crashes
-    //
-    //deinit {
-    //
-    //    // manually nil the label
-    //    setUserInfoObject(nil, forKey: .label)
-    //
-    //    // notify the parent to update
-    //    if let parentProgress = labelProgressParent {
-    //        DispatchQueue.global().async {
-    //            parentProgress.updateUserInfoWithChildLabelsAndNotifyParent()
-    //        }
-    //    }
-    //
-    //}
+    deinit {
+    
+        // manually nil the label
+        _label = nil
+        combinedLabel = nil
+        deepLabel = nil
+        
+        // notify the parent to update
+        if let parentProgress = labelProgressParent {
+            DispatchQueue.global().async {
+                parentProgress.notifyParentToUpdateChildren()
+            }
+        }
+    
+    }
     
 }
 
