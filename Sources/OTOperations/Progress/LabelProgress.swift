@@ -25,10 +25,13 @@ public class LabelProgress: Progress {
     /// Set this property to set this progress instance's label, or set to nil to remove the label if one was set.
     public var label: String? {
         get {
-            userInfo[.label] as? String
+            let getVal = userInfo[.label]
+            let asString = getVal as? String
+            return asString
         }
         set {
-            let oldValue = userInfo[.label] as? String
+            let getOldVal = userInfo[.label]
+            let oldValue = getOldVal as? String
             
             if newValue?.isEmpty == true {
                 setUserInfoObject(nil, forKey: .label)
@@ -76,7 +79,9 @@ public class LabelProgress: Progress {
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
     public var childLabels: [String] {
         
-        userInfo[.childLabels] as? [String] ?? []
+        let getVal = userInfo[.childLabels]
+        let asString = getVal as? [String]
+        return asString ?? []
         
     }
     
@@ -85,7 +90,9 @@ public class LabelProgress: Progress {
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
     public var deepLabels: [String] {
         
-        userInfo[.deepLabels] as? [String] ?? []
+        let getVal = userInfo[.deepLabels]
+        let asString = getVal as? [String]
+        return asString ?? []
         
     }
     
@@ -94,7 +101,7 @@ public class LabelProgress: Progress {
     /// Introspects all 1st-generation child progress objects and caches their labels in this progress instance's `userInfo` dictionary.
     internal func updateUserInfoWithChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
         
-        let children = self.children as? Set<LabelProgress> ?? []
+        let children = self.children.compactMap { $0 as? LabelProgress }
         
         autoreleasepool {
             // remove duplicates while maintaining NSSet order
@@ -103,7 +110,9 @@ public class LabelProgress: Progress {
                     if incompleteOnly, (element.isFinished || element.isCancelled) {
                        return nil
                     }
-                    return element.userInfo[.label] as? String
+                    let getVal = element.userInfo[.label]
+                    let asString = getVal as? String
+                    return asString
                 }
                 .reduce(into: []) { accum, element in
                     guard !accum.contains(element) else { return }
@@ -119,7 +128,9 @@ public class LabelProgress: Progress {
                     if incompleteOnly, (element.isFinished || element.isCancelled) {
                         return nil
                     }
-                    return element.userInfo[.combinedLabel] as? String
+                    let getVal = element.userInfo[.combinedLabel]
+                    let asString = getVal as? String
+                    return asString
                 }
                 .reduce(into: []) { accum, element in
                     guard !accum.contains(element) else { return }
@@ -212,19 +223,21 @@ public class LabelProgress: Progress {
         
     }
     
-    deinit {
-        
-        // manually nil the label
-        setUserInfoObject(nil, forKey: .label)
-        
-        // notify the parent to update
-        if let parentProgress = labelProgressParent {
-            DispatchQueue.global().async {
-                parentProgress.updateUserInfoWithChildLabelsAndNotifyParent()
-            }
-        }
-        
-    }
+    // note: disabling this in 1.0.4 as a test to avoid potential crashes
+    //
+    //deinit {
+    //
+    //    // manually nil the label
+    //    setUserInfoObject(nil, forKey: .label)
+    //
+    //    // notify the parent to update
+    //    if let parentProgress = labelProgressParent {
+    //        DispatchQueue.global().async {
+    //            parentProgress.updateUserInfoWithChildLabelsAndNotifyParent()
+    //        }
+    //    }
+    //
+    //}
     
 }
 
