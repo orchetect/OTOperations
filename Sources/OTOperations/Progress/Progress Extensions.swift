@@ -37,6 +37,21 @@ extension Progress {
         
     }
     
+    /// Returns all child `LabelProgress` instances that are attached.
+    @_disfavoredOverload
+    internal var labelProgressChildren: Set<LabelProgress> {
+        
+        autoreleasepool {
+            // keyPath "_children" also works
+            let getChildren = value(forKeyPath: "children")
+            guard let nsSet = getChildren as? NSSet else { return [] }
+            let mappedChildren = nsSet.compactMap { $0 as? LabelProgress }
+            let mappedSet = Set(mappedChildren)
+            return mappedSet
+        }
+        
+    }
+    
     /// Removes any child `Progress` references manually and decouples them.
     /// Returns number of children purged.
     @_disfavoredOverload @discardableResult

@@ -95,7 +95,7 @@ public class LabelProgress: Progress {
     /// Introspects all 1st-generation child progress objects and caches their labels.
     internal func updateChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
         
-        let children = self.children.compactMap { $0 as? LabelProgress }
+        let children = labelProgressChildren
         
         // remove duplicates while maintaining NSSet order
         let labels: [String] = children
@@ -206,12 +206,14 @@ public class LabelProgress: Progress {
     deinit {
     
         // manually nil the label
-        label = nil
-    
+        _label = nil
+        combinedLabel = nil
+        deepLabel = nil
+        
         // notify the parent to update
         if let parentProgress = labelProgressParent {
             DispatchQueue.global().async {
-                parentProgress.updateChildLabelsAndNotifyParent()
+                parentProgress.notifyParentToUpdateChildren()
             }
         }
     
