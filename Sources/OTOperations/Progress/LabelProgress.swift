@@ -25,13 +25,18 @@ public class LabelProgress: Progress {
     /// Set this property to set this progress instance's label, or set to nil to remove the label if one was set.
     public var label: String? {
         get {
-            let getVal = userInfo[.label]
-            let asString = getVal as? String
-            return asString
+            autoreleasepool {
+                let getVal = userInfo[.label]
+                let asString = getVal as? String
+                return asString
+            }
         }
         set {
-            let getOldVal = userInfo[.label]
-            let oldValue = getOldVal as? String
+            let oldValue = autoreleasepool { () -> String? in
+                let getOldVal = userInfo[.label]
+                let asString = getOldVal as? String
+                return asString
+            }
             
             if newValue?.isEmpty == true {
                 setUserInfoObject(nil, forKey: .label)
@@ -79,9 +84,11 @@ public class LabelProgress: Progress {
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
     public var childLabels: [String] {
         
-        let getVal = userInfo[.childLabels]
-        let asString = getVal as? [String]
-        return asString ?? []
+        autoreleasepool {
+            let getVal = userInfo[.childLabels]
+            let asString = getVal as? [String]
+            return asString ?? []
+        }
         
     }
     
@@ -90,9 +97,11 @@ public class LabelProgress: Progress {
     /// - Note: Child `Progress` objects are stored internally as an `NSSet` which means their order will be random and may change. Their ordering will be stable for their lifecycle however.
     public var deepLabels: [String] {
         
-        let getVal = userInfo[.deepLabels]
-        let asString = getVal as? [String]
-        return asString ?? []
+        autoreleasepool {
+            let getVal = userInfo[.deepLabels]
+            let asString = getVal as? [String]
+            return asString ?? []
+        }
         
     }
     
