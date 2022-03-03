@@ -95,7 +95,9 @@ open class BasicOperation: Operation, ProgressReporting {
         
         if label != nil { labelProgress.label = label }
         
-        progress.cancellationHandler = { [progress] in
+        progress.cancellationHandler = { [weak progress] in
+            guard let progress = progress else { return }
+            
             // automatically set progress to finished state if cancelled
             progress.completedUnitCount = progress.totalUnitCount
         }
