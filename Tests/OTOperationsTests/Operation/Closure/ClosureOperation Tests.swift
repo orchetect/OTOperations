@@ -9,7 +9,6 @@ import XCTest
 import OTOperations
 
 final class ClosureOperation_Tests: XCTestCase {
-    
     override func setUpWithError() throws {
         mainCheck = { }
     }
@@ -17,7 +16,6 @@ final class ClosureOperation_Tests: XCTestCase {
     private var mainCheck: () -> Void = { }
     
     func testOpRun() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         
         let op = ClosureOperation {
@@ -48,11 +46,9 @@ final class ClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     func testOpNotRun() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         mainBlockExp.isInverted = true
         
@@ -84,12 +80,10 @@ final class ClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 0.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test as a standalone operation. Cancel it before it runs.
     func testOpCancelBeforeRun() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         mainBlockExp.isInverted = true
         
@@ -110,7 +104,8 @@ final class ClosureOperation_Tests: XCTestCase {
         }
         
         op.cancel()
-        op.start() // in an OperationQueue, all operations must start even if they're already cancelled
+        op
+            .start() // in an OperationQueue, all operations must start even if they're already cancelled
         
         wait(for: [mainBlockExp, completionBlockExp], timeout: 0.3)
         
@@ -123,13 +118,11 @@ final class ClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test in the context of an OperationQueue. Run is implicit.
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testQueue() {
-        
         let opQ = OperationQueue()
         
         let mainBlockExp = expectation(description: "Main Block Called")
@@ -171,12 +164,10 @@ final class ClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isCancelled)
         XCTAssertEqual(opQ.progress.fractionCompleted, 1.0)
         XCTAssertFalse(opQ.progress.isIndeterminate)
-        
     }
     
     /// Test that start() runs synchronously. Run it.
     func testOp_SynchronousTest_Run() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         
         let completionBlockExp = expectation(description: "Completion Block Called")
@@ -212,9 +203,7 @@ final class ClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.progress.isIndeterminate)
         
         wait(for: [mainBlockExp, completionBlockExp], timeout: 2)
-        
     }
-    
 }
 
 #endif

@@ -10,14 +10,12 @@ import OTOperations
 import OTAtomics
 
 final class OperationQueueExtensions_Success_Tests: XCTestCase {
-    
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
     
     @OTAtomicsThreadSafe fileprivate var val = 0
     
     func testWaitUntilAllOperationsAreFinished_Timeout_Success() {
-        
         let opQ = OperationQueue()
         opQ.maxConcurrentOperationCount = 1 // serial
         opQ.isSuspended = true
@@ -35,20 +33,16 @@ final class OperationQueueExtensions_Success_Tests: XCTestCase {
         XCTAssertEqual(timeoutResult, .success)
         XCTAssertEqual(opQ.operationCount, 0)
         XCTAssertEqual(val, 1)
-        
     }
-    
 }
 
 final class OperationQueueExtensions_TimedOut_Tests: XCTestCase {
-    
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
     
     @OTAtomicsThreadSafe fileprivate var val = 0
     
     func testWaitUntilAllOperationsAreFinished_Timeout_TimedOut() {
-        
         let opQ = OperationQueue()
         opQ.maxConcurrentOperationCount = 1 // serial
         opQ.isSuspended = true
@@ -66,9 +60,7 @@ final class OperationQueueExtensions_TimedOut_Tests: XCTestCase {
         XCTAssertEqual(timeoutResult, .timedOut)
         XCTAssertEqual(opQ.operationCount, 1)
         XCTAssertEqual(val, 0)
-        
     }
-    
 }
 
 #endif

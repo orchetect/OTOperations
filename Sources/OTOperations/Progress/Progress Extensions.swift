@@ -8,24 +8,20 @@
 import Foundation
 
 extension Progress {
-    
     /// Returns the parent `Progress` instance, if one is attached.
     @_disfavoredOverload
     internal var parent: Progress? {
-        
         autoreleasepool {
             // keyPath "_parent" also works
             let getParent = value(forKeyPath: "parent")
             let typedParent = getParent as? Progress
             return typedParent
         }
-        
     }
     
     /// Returns all child `Progress` instances that are attached.
     @_disfavoredOverload
     internal var children: Set<Progress> {
-        
         autoreleasepool {
             // keyPath "_children" also works
             let getChildren = value(forKeyPath: "children")
@@ -34,13 +30,11 @@ extension Progress {
             let mappedSet = Set(mappedChildren)
             return mappedSet
         }
-        
     }
     
     /// Returns all child `LabelProgress` instances that are attached.
     @_disfavoredOverload
     internal var labelProgressChildren: Set<LabelProgress> {
-        
         autoreleasepool {
             // keyPath "_children" also works
             let getChildren = value(forKeyPath: "children")
@@ -49,14 +43,12 @@ extension Progress {
             let mappedSet = Set(mappedChildren)
             return mappedSet
         }
-        
     }
     
     /// Removes any child `Progress` references manually and decouples them.
     /// Returns number of children purged.
     @_disfavoredOverload @discardableResult
     internal func purgeChildren() -> Int {
-        
         var purgedCount = 0
         
         autoreleasepool {
@@ -66,7 +58,7 @@ extension Progress {
             
             let children = nsSet.compactMap { $0 as? Progress }
             
-            guard children.count > 0
+            guard !children.isEmpty
             else { return }
             
             purgedCount = children.count
@@ -85,17 +77,13 @@ extension Progress {
         }
         
         return purgedCount
-        
     }
-    
 }
 
 extension LabelProgress {
-
     /// Removes any child `LabelProgress` references manually and decouples them.
     @_disfavoredOverload @discardableResult
     internal func purgeLabelProgressChildren() -> Int {
-        
         var purgedCount = 0
         
         autoreleasepool {
@@ -105,7 +93,7 @@ extension LabelProgress {
             
             let typedChildren = nsSet.compactMap { $0 as? LabelProgress }
             
-            guard typedChildren.count > 0
+            guard !typedChildren.isEmpty
             else { return }
             
             purgedCount = typedChildren.count
@@ -124,9 +112,7 @@ extension LabelProgress {
         }
         
         return purgedCount
-        
     }
-    
 }
 
 #endif

@@ -10,7 +10,6 @@ import OTAtomics
 
 /// An `OperationQueue` subclass with useful additions.
 open class BasicOperationQueue: OperationQueue {
-    
     /// Any time the queue completes all of its operations and returns to an empty queue, reset the progress object's total unit count to 0.
     public final var resetProgressWhenFinished: Bool
     
@@ -25,7 +24,6 @@ open class BasicOperationQueue: OperationQueue {
     }
     
     private func updateFromOperationQueueType() {
-        
         switch operationQueueType {
         case .serialFIFO:
             maxConcurrentOperationCount = 1
@@ -33,10 +31,9 @@ open class BasicOperationQueue: OperationQueue {
         case .concurrentAutomatic:
             maxConcurrentOperationCount = OperationQueue.defaultMaxConcurrentOperationCount
             
-        case .concurrent(let maxConcurrentOperations):
+        case let .concurrent(maxConcurrentOperations):
             maxConcurrentOperationCount = maxConcurrentOperations
         }
-        
     }
     
     @OTAtomicsThreadSafe private var done = true
@@ -63,8 +60,10 @@ open class BasicOperationQueue: OperationQueue {
         }
     }
     
-    public typealias StatusHandler = (_ newStatus: OperationQueueStatus,
-                                      _ oldStatus: OperationQueueStatus) -> Void
+    public typealias StatusHandler = (
+        _ newStatus: OperationQueueStatus,
+        _ oldStatus: OperationQueueStatus
+    ) -> Void
     
     /// Handler called any time the `status` property changes.
     /// Handler is called async on the main thread.
@@ -76,46 +75,43 @@ open class BasicOperationQueue: OperationQueue {
     private var _progress: Progress = LabelProgress(totalUnitCount: 0)
     
     @available(macOS 10.9, iOS 7.0, tvOS 9.0, watchOS 2.0, *)
-    @objc dynamic
-    public override final var progress: Progress { _progress }
+    @objc override public final dynamic
+    var progress: Progress { _progress }
     
     /// Return `.progress` typed as `LabelProgress` in order to get or set label information.
     public final var labelProgress: LabelProgress {
-        
         progress as! LabelProgress
-        
     }
     
     // MARK: - Init
     
     /// Set max concurrent operation count.
     /// Status handler is called async on the main thread.
-    public init(type operationQueueType: OperationQueueType,
-                label: String? = nil,
-                resetProgressWhenFinished: Bool = false,
-                statusHandler: StatusHandler? = nil) {
-        
+    public init(
+        type operationQueueType: OperationQueueType,
+        label: String? = nil,
+        resetProgressWhenFinished: Bool = false,
+        statusHandler: StatusHandler? = nil
+    ) {
         self.operationQueueType = operationQueueType
         self.resetProgressWhenFinished = resetProgressWhenFinished
         self.statusHandler = statusHandler
         
         super.init()
         
-        self.labelProgress.label = label
+        labelProgress.label = label
         
         updateFromOperationQueueType()
         
         addObservers()
-        
     }
     
     // MARK: - Overrides
     
     /// Add an operation to the operation queue.
-    public final override func addOperation(
+    override public final func addOperation(
         _ op: Operation
     ) {
-        
         // failsafe reset of progress to known state if queue is empty
         var resetTotalUnitCountNudge = false
         if resetProgressWhenFinished, operationCount == 0 {
@@ -139,8 +135,10 @@ open class BasicOperationQueue: OperationQueue {
         if let basicOp = op as? BasicOperation {
             let units = basicOp.progressWeight.rawValue
             progress.totalUnitCount += units
-            progress.addChild(basicOp.progress,
-                              withPendingUnitCount: units)
+            progress.addChild(
+                basicOp.progress,
+                withPendingUnitCount: units
+            )
         } else {
             progress.totalUnitCount += 1
         }
@@ -152,25 +150,22 @@ open class BasicOperationQueue: OperationQueue {
         }
         done = false
         super.addOperation(op)
-        
     }
     
     /// Add an operation block.
-    public final override func addOperation(
+    override public final func addOperation(
         _ block: @escaping () -> Void
     ) {
-        
         // wrap in an actual operation object so we can track it
         let op = ClosureOperation {
             block()
         }
         addOperation(op)
-        
     }
     
     /// Add operation blocks.
     /// If queue type is Serial FIFO, operations will be added in array order.
-    public final override func addOperations(
+    override public final func addOperations(
         _ ops: [Operation],
         waitUntilFinished wait: Bool
     ) {
@@ -205,8 +200,10 @@ open class BasicOperationQueue: OperationQueue {
             if let basicOp = op as? BasicOperation {
                 let units = basicOp.progressWeight.rawValue
                 progress.totalUnitCount += units
-                progress.addChild(basicOp.progress,
-                                  withPendingUnitCount: units)
+                progress.addChild(
+                    basicOp.progress,
+                    withPendingUnitCount: units
+                )
             } else {
                 progress.totalUnitCount += 1
             }
@@ -219,7 +216,6 @@ open class BasicOperationQueue: OperationQueue {
         }
         done = false
         super.addOperations(ops, waitUntilFinished: wait)
-        
     }
     
     // MARK: - Convenience Operations
@@ -229,14 +225,12 @@ open class BasicOperationQueue: OperationQueue {
         weight: ProgressWeight = .default(),
         _ block: @escaping () -> Void
     ) {
-       
         // wrap in an actual operation object so we can track it
         let op = ClosureOperation {
             block()
         }
         op.progressWeight = weight
         addOperation(op)
-        
     }
     
     // MARK: - KVO Observers
@@ -245,12 +239,10 @@ open class BasicOperationQueue: OperationQueue {
     private var observers: [NSKeyValueObservation] = []
     
     private func addObservers() {
-        
         // self.isSuspended
         
         observers.append(
-            observe(\.isSuspended, options: [.new])
-            { [self, progress] _, _ in
+            observe(\.isSuspended, options: [.new]) { [self, progress] _, _ in
                 // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
                 if isSuspended {
@@ -266,7 +258,6 @@ open class BasicOperationQueue: OperationQueue {
                             label: labelProgress.deepLabel,
                             description: progress.localizedDescription
                         )
-                        
                     }
                 }
             }
@@ -275,8 +266,7 @@ open class BasicOperationQueue: OperationQueue {
         // self.operationCount
         
         observers.append(
-            observe(\.operationCount, options: [.new])
-            { [self, progress] _, _ in
+            observe(\.operationCount, options: [.new]) { [self, progress] _, _ in
                 // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
                 done = operationCount == 0
@@ -289,9 +279,11 @@ open class BasicOperationQueue: OperationQueue {
                    !progress.isFinished,
                    operationCount > 0
                 {
-                    status = .inProgress(fractionCompleted: progress.fractionCompleted,
-                                         label: labelProgress.deepLabel,
-                                         description: progress.localizedDescription)
+                    status = .inProgress(
+                        fractionCompleted: progress.fractionCompleted,
+                        label: labelProgress.deepLabel,
+                        description: progress.localizedDescription
+                    )
                 } else {
                     setStatusIdle(resetProgress: resetProgressWhenFinished)
                 }
@@ -302,8 +294,7 @@ open class BasicOperationQueue: OperationQueue {
         // (NSProgress docs state that fractionCompleted is KVO-observable)
         
         observers.append(
-            progress.observe(\.fractionCompleted, options: [.new])
-            { [self, progress] _, _ in
+            progress.observe(\.fractionCompleted, options: [.new]) { [self, progress] _, _ in
                 // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
                 guard !isSuspended else { return }
@@ -314,9 +305,11 @@ open class BasicOperationQueue: OperationQueue {
                 {
                     setStatusIdle(resetProgress: resetProgressWhenFinished)
                 } else {
-                    status = .inProgress(fractionCompleted: progress.fractionCompleted,
-                                         label: labelProgress.deepLabel,
-                                         description: progress.localizedDescription)
+                    status = .inProgress(
+                        fractionCompleted: progress.fractionCompleted,
+                        label: labelProgress.deepLabel,
+                        description: progress.localizedDescription
+                    )
                 }
             }
         )
@@ -325,8 +318,7 @@ open class BasicOperationQueue: OperationQueue {
         // (NSProgress docs state that isFinished is KVO-observable)
         
         observers.append(
-            progress.observe(\.isFinished, options: [.new])
-            { [self, progress] _, _ in
+            progress.observe(\.isFinished, options: [.new]) { [self, progress] _, _ in
                 // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
                 if progress.isFinished {
@@ -334,14 +326,11 @@ open class BasicOperationQueue: OperationQueue {
                 }
             }
         )
-        
     }
     
     private func removeObservers() {
-        
         observers.forEach { $0.invalidate() } // for extra safety, invalidate them first
         observers.removeAll()
-        
     }
     
     /// Only call as a result of the queue emptying
@@ -367,12 +356,9 @@ open class BasicOperationQueue: OperationQueue {
     }
     
     deinit {
-        
         // this is very important or it may result in random crashes if the KVO observers aren't nuked at the appropriate time
         removeObservers()
-        
     }
-    
 }
 
 #endif

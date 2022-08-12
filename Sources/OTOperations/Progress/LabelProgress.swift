@@ -11,13 +11,10 @@ import OTAtomics
 
 /// A `Progress` subclass that supports a custom label and automatically aggregates labels from child progress objects.
 public class LabelProgress: Progress {
-    
     // MARK: - Refs
     
     private var labelProgressParent: LabelProgress? {
-        
         parent as? LabelProgress
-        
     }
     
     // MARK: - Label Properties
@@ -55,14 +52,12 @@ public class LabelProgress: Progress {
     public private(set) var combinedLabel: String?
     
     private func generateCombinedLabel() {
-        
         var out = label
         let getChildLabels = childLabels.joined(separator: ", ")
         if !getChildLabels.isEmpty {
             out = out == nil ? getChildLabels : out! + " - " + getChildLabels
         }
         combinedLabel = out
-        
     }
     
     /// Custom label (user-readable description) that combines the current instance's label with the labels of all nested children.
@@ -72,14 +67,12 @@ public class LabelProgress: Progress {
     public private(set) var deepLabel: String? = nil
     
     private func generateDeepLabel() {
-        
         var out = label
         let getChildLabels = deepLabels.joined(separator: ", ")
         if !getChildLabels.isEmpty {
             out = out == nil ? getChildLabels : out! + " - " + getChildLabels
         }
         deepLabel = out
-        
     }
     
     /// Returns an array of the labels of direct children only (not nested children).
@@ -101,7 +94,6 @@ public class LabelProgress: Progress {
     
     /// Introspects all 1st-generation child progress objects and caches their labels.
     internal func updateChildLabelsAndNotifyParent(incompleteOnly: Bool = true) {
-        
         let children = labelProgressChildren
         
         // remove duplicates while maintaining NSSet order
@@ -114,7 +106,7 @@ public class LabelProgress: Progress {
             }
             .removingDuplicatesSorted()
         
-        self.childLabels = labels
+        childLabels = labels
         
         // remove duplicates while maintaining NSSet order
         let combinedLabels: [String] = children
@@ -126,56 +118,53 @@ public class LabelProgress: Progress {
             }
             .removingDuplicatesSorted()
         
-        self.deepLabels = combinedLabels
+        deepLabels = combinedLabels
         
         generateLabels()
         notifyParentToUpdateChildren()
-        
     }
     
     private func generateLabels() {
-        
         generateCombinedLabel()
         generateDeepLabel()
-        
     }
     
     private func notifyParentToUpdateChildren() {
-        
         labelProgressParent?.updateChildLabelsAndNotifyParent()
-        
     }
     
     // MARK: - Inits
     
     public init() {
-        
-        super.init(parent: nil,
-                   userInfo: nil)
-        
+        super.init(
+            parent: nil,
+            userInfo: nil
+        )
     }
     
     public init(totalUnitCount unitCount: Int64) {
-        
-        super.init(parent: nil,
-                   userInfo: nil)
-        self.totalUnitCount = unitCount
-        
+        super.init(
+            parent: nil,
+            userInfo: nil
+        )
+        totalUnitCount = unitCount
     }
     
-    public init(totalUnitCount unitCount: Int64,
-                label: String) {
-
-        super.init(parent: nil,
-                   userInfo: nil)
-        self.totalUnitCount = unitCount
+    public init(
+        totalUnitCount unitCount: Int64,
+        label: String
+    ) {
+        super.init(
+            parent: nil,
+            userInfo: nil
+        )
+        totalUnitCount = unitCount
         self.label = label
-        
     }
     
     // sadly there is no way to make the compiler happy when trying to do this...
     //
-    //public convenience init(totalUnitCount unitCount: Int64,
+    // public convenience init(totalUnitCount unitCount: Int64,
     //                        parent: Progress,
     //                        pendingUnitCount portionOfParentTotalUnitCount: Int64,
     //                        label: String) {
@@ -186,32 +175,35 @@ public class LabelProgress: Progress {
     //    self.label = label
     //    notifyParentToUpdateChildren() // needed?
     //
-    //}
+    // }
     
-    public init(parent parentProgressOrNil: Progress?,
-                userInfo userInfoOrNil: [ProgressUserInfoKey : Any]? = nil,
-                label: String) {
-        
-        super.init(parent: parentProgressOrNil,
-                   userInfo: userInfoOrNil)
+    public init(
+        parent parentProgressOrNil: Progress?,
+        userInfo userInfoOrNil: [ProgressUserInfoKey: Any]? = nil,
+        label: String
+    ) {
+        super.init(
+            parent: parentProgressOrNil,
+            userInfo: userInfoOrNil
+        )
         self.label = label
         notifyParentToUpdateChildren()
-        
     }
     
     // MARK: - Class Overrides
     
-    public override func addChild(_ child: Progress,
-                                  withPendingUnitCount inUnitCount: Int64) {
-        
-        super.addChild(child,
-                       withPendingUnitCount: inUnitCount)
+    override public func addChild(
+        _ child: Progress,
+        withPendingUnitCount inUnitCount: Int64
+    ) {
+        super.addChild(
+            child,
+            withPendingUnitCount: inUnitCount
+        )
         updateChildLabelsAndNotifyParent()
-        
     }
     
     deinit {
-    
         // manually nil the label
         _label = nil
         combinedLabel = nil
@@ -223,9 +215,7 @@ public class LabelProgress: Progress {
                 parentProgress.notifyParentToUpdateChildren()
             }
         }
-    
     }
-    
 }
 
 #endif

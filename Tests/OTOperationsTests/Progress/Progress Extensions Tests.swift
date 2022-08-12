@@ -9,49 +9,39 @@ import XCTest
 @testable import OTOperations
 
 final class ProgressExtensions_Tests: XCTestCase {
-    
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
     
     func testProgressParent_Nil() {
-        
         let empty = Progress()
         
         XCTAssertNil(empty.parent)
-        
     }
     
     func testProgressParent() {
-        
         let master = Progress()
         let child1 = Progress(totalUnitCount: 10, parent: master, pendingUnitCount: 10)
         let child2 = Progress(totalUnitCount: 10, parent: master, pendingUnitCount: 10)
         
         XCTAssertEqual(child1.parent, master)
         XCTAssertEqual(child2.parent, master)
-        
     }
     
     func testProgressChildren_Empty() {
-        
         let empty = Progress()
         
         XCTAssertEqual(empty.children, [])
-        
     }
     
     func testProgressChildren() {
-        
         let master = Progress()
         let child1 = Progress(totalUnitCount: 10, parent: master, pendingUnitCount: 10)
         let child2 = Progress(totalUnitCount: 10, parent: master, pendingUnitCount: 10)
         
         XCTAssertEqual(master.children, [child1, child2])
-        
     }
     
     func testParent_Memory() {
-        
         class Foo {
             weak var master: Progress?
             weak var child1: Progress?
@@ -85,11 +75,9 @@ final class ProgressExtensions_Tests: XCTestCase {
         XCTAssertNil(foo.child1?.parent)
         XCTAssertNil(foo.child2)
         XCTAssertNil(foo.child2?.parent)
-        
     }
     
     func testChildren_Memory() {
-        
         class Foo {
             var master: Progress!
             weak var child1: Progress?
@@ -131,11 +119,9 @@ final class ProgressExtensions_Tests: XCTestCase {
         foo = nil
         
         XCTAssertNil(masterRef)
-        
     }
     
     func testPurgeChildren() {
-        
         class Foo {
             var master: Progress! = Progress(totalUnitCount: 20)
             weak var child1: Progress?
@@ -148,14 +134,18 @@ final class ProgressExtensions_Tests: XCTestCase {
         autoreleasepool {
             foo = Foo()
             
-            let newChild1 = Progress(totalUnitCount: 10,
-                                     parent: foo.master,
-                                     pendingUnitCount: 10)
+            let newChild1 = Progress(
+                totalUnitCount: 10,
+                parent: foo.master,
+                pendingUnitCount: 10
+            )
             foo.child1 = newChild1
             
-            let newChild2 = Progress(totalUnitCount: 10,
-                                     parent: foo.master,
-                                     pendingUnitCount: 10)
+            let newChild2 = Progress(
+                totalUnitCount: 10,
+                parent: foo.master,
+                pendingUnitCount: 10
+            )
             foo.child2 = newChild2
             
             XCTAssertNotNil(foo.child1)
@@ -187,11 +177,9 @@ final class ProgressExtensions_Tests: XCTestCase {
         
         // check that the parent releases
         XCTAssertNil(masterRef)
-        
     }
     
     func testPurgeLabelProgressChildren() {
-        
         class Foo {
             var master: LabelProgress! = LabelProgress(totalUnitCount: 20)
             weak var child1: LabelProgress?
@@ -241,9 +229,7 @@ final class ProgressExtensions_Tests: XCTestCase {
         
         // check that the parent releases
         XCTAssertNil(masterRef)
-        
     }
-    
 }
 
 #endif

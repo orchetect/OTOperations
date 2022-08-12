@@ -8,18 +8,17 @@
 import Foundation
 
 extension Operation {
-    
     /// Convenience static constructor for `ClosureOperation`.
     public static func basic(
         label: String? = nil,
         weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping () -> Void
     ) -> ClosureOperation {
-        
-        ClosureOperation(label: label,
-                         weight: weight,
-                         mainBlock)
-        
+        ClosureOperation(
+            label: label,
+            weight: weight,
+            mainBlock
+        )
     }
     
     /// Convenience static constructor for `InteractiveClosureOperation`.
@@ -28,11 +27,11 @@ extension Operation {
         weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveClosureOperation) -> Void
     ) -> InteractiveClosureOperation {
-        
-        InteractiveClosureOperation(label: label,
-                                    weight: weight,
-                                    mainBlock)
-        
+        InteractiveClosureOperation(
+            label: label,
+            weight: weight,
+            mainBlock
+        )
     }
     
     /// Convenience static constructor for `InteractiveAsyncClosureOperation`.
@@ -42,12 +41,12 @@ extension Operation {
         weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveAsyncClosureOperation) -> Void
     ) -> InteractiveAsyncClosureOperation {
-        
-        InteractiveAsyncClosureOperation(on: queue,
-                                         label: label,
-                                         weight: weight,
-                                         mainBlock)
-        
+        InteractiveAsyncClosureOperation(
+            on: queue,
+            label: label,
+            weight: weight,
+            mainBlock
+        )
     }
     
     /// Convenience static constructor for `AtomicBlockOperation`.
@@ -59,20 +58,19 @@ extension Operation {
         weight: BasicOperationQueue.ProgressWeight = .default(),
         _ setupBlock: ((_ operation: AtomicBlockOperation<T>) -> Void)? = nil
     ) -> AtomicBlockOperation<T> {
-        
-        let op = AtomicBlockOperation(type: operationQueueType,
-                                      label: label,
-                                      weight: weight,
-                                      initialMutableValue: initialMutableValue)
+        let op = AtomicBlockOperation(
+            type: operationQueueType,
+            label: label,
+            weight: weight,
+            initialMutableValue: initialMutableValue
+        )
         
         if let setupBlock = setupBlock {
             op.setSetupBlock(setupBlock)
         }
         
         return op
-        
     }
-    
 }
 
 #endif

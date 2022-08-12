@@ -23,7 +23,7 @@ import Foundation
 /// This object is designed to be subclassed.
 ///
 /// Refer to the following example for calls that must be made within the main closure block:
-/// 
+///
 ///     class MyOperation: BasicAsyncOperation {
 ///         override func main() {
 ///             // At the start, call this and conditionally return:
@@ -47,9 +47,7 @@ import Foundation
 ///
 /// - note: Inherits from `BasicOperation`.
 open class BasicAsyncOperation: BasicOperation {
-    
-    final public override var isAsynchronous: Bool { true }
-    
+    override public final var isAsynchronous: Bool { true }
 }
 
 #endif

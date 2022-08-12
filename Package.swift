@@ -12,7 +12,8 @@ let package = Package(
     products: [
         .library(
             name: "OTOperations",
-            targets: ["OTOperations"])
+            targets: ["OTOperations"]
+        )
     ],
     
     dependencies: [
@@ -25,10 +26,12 @@ let package = Package(
     targets: [
         .target(
             name: "OTOperations",
-            dependencies: ["OTAtomics"]),
+            dependencies: ["OTAtomics"]
+        ),
         .testTarget(
             name: "OTOperationsTests",
-            dependencies: ["OTOperations", "XCTestUtils"])
+            dependencies: ["OTOperations", "XCTestUtils"]
+        )
     ]
 )
 

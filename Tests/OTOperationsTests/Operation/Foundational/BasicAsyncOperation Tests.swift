@@ -9,7 +9,6 @@ import XCTest
 import OTOperations
 
 final class BasicAsyncOperation_Tests: XCTestCase {
-    
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
     
@@ -18,9 +17,7 @@ final class BasicAsyncOperation_Tests: XCTestCase {
     /// `BasicAsyncOperation` is designed to be subclassed.
     /// This is a simple subclass to test.
     private class TestBasicAsyncOperation: BasicAsyncOperation {
-        
         override func main() {
-            
             print("Starting main()")
             guard mainShouldStart() else { return }
             
@@ -35,24 +32,20 @@ final class BasicAsyncOperation_Tests: XCTestCase {
                 
                 self.completeOperation()
             }
-            
         }
-        
     }
     
     /// `BasicAsyncOperation` is designed to be subclassed.
     /// This is a simple subclass to test.
     private class TestLongRunningBasicAsyncOperation: BasicAsyncOperation {
-        
         private let totalOpCount = 100
         
         init() {
-            super.init()   
+            super.init()
             progress.totalUnitCount = Int64(totalOpCount)
         }
         
         override func main() {
-            
             print("Starting main()")
             guard mainShouldStart() else { return }
             
@@ -63,7 +56,7 @@ final class BasicAsyncOperation_Tests: XCTestCase {
             DispatchQueue.global().async { [weak self] in
                 guard let self = self else { return }
                 
-                for opNum in 1...self.totalOpCount { // finishes in 20 seconds
+                for opNum in 1 ... self.totalOpCount { // finishes in 20 seconds
                     // it's good to call this once or more throughout the operation
                     // so we can return early if the operation is cancelled
                     if self.mainShouldAbort() { return }
@@ -75,16 +68,13 @@ final class BasicAsyncOperation_Tests: XCTestCase {
                 
                 self.completeOperation()
             }
-            
         }
-        
     }
     
     // MARK: - Tests
     
     /// Test as a standalone operation. Run it.
     func testOpRun() {
-        
         let op = TestBasicAsyncOperation()
         
         let completionBlockExp = expectation(description: "Completion Block Called")
@@ -106,12 +96,10 @@ final class BasicAsyncOperation_Tests: XCTestCase {
         XCTAssertFalse(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test as a standalone operation. Do not run it.
     func testOpNotRun() {
-        
         let op = TestBasicAsyncOperation()
         
         let completionBlockExp = expectation(description: "Completion Block Called")
@@ -133,12 +121,10 @@ final class BasicAsyncOperation_Tests: XCTestCase {
         XCTAssertFalse(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 0.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test as a standalone operation. Run it. Cancel before it finishes.
     func testOpRun_Cancel() {
-        
         let op = TestLongRunningBasicAsyncOperation()
         
         let completionBlockExp = expectation(description: "Completion Block Called")
@@ -162,13 +148,11 @@ final class BasicAsyncOperation_Tests: XCTestCase {
         XCTAssertTrue(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test in the context of an OperationQueue. Run is implicit.
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testQueue() {
-        
         let opQ = OperationQueue()
         
         let op = TestBasicAsyncOperation()
@@ -201,13 +185,11 @@ final class BasicAsyncOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isCancelled)
         XCTAssertEqual(opQ.progress.fractionCompleted, 1.0)
         XCTAssertFalse(opQ.progress.isIndeterminate)
-        
     }
     
     /// Test in the context of an OperationQueue. Run is implicit. Cancel before it finishes.
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testQueue_Cancel() {
-        
         let opQ = OperationQueue()
         
         let op = TestLongRunningBasicAsyncOperation()
@@ -242,9 +224,7 @@ final class BasicAsyncOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isCancelled)
         XCTAssertEqual(opQ.progress.fractionCompleted, 1.0)
         XCTAssertFalse(opQ.progress.isIndeterminate)
-        
     }
-    
 }
 
 #endif

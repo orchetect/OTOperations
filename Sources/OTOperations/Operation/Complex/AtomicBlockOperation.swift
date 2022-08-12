@@ -50,44 +50,33 @@ import Foundation
 ///
 /// - note: Inherits from both `BasicAsyncOperation` and `BasicOperation`.
 open class AtomicBlockOperation<T>: BasicOperation {
-    
     // MARK: - Operations
     
     private var operationQueueType: OperationQueueType {
-        
         operationQueue.operationQueueType
-        
     }
     
     private let operationQueue: AtomicOperationQueue<T>!
     
     /// Stores a weak reference to the last `Operation` added to the internal operation queue. If the operation is complete and the queue is empty, this may return `nil`.
     public final weak var lastAddedOperation: Operation? {
-        
         operationQueue.lastAddedOperation
-        
     }
     
-    public override var progress: Progress {
-        
+    override public var progress: Progress {
         operationQueue.progress
-        
     }
     
     // MARK: - Shared Mutable Value
     
     /// The thread-safe shared mutable value that all operation blocks operate upon.
     public final var value: T {
-        
         operationQueue.sharedMutableValue
-        
     }
     
     /// Mutate the shared atomic variable in a closure.
     public final func mutateValue(_ block: (inout T) -> Void) {
-        
         block(&operationQueue.sharedMutableValue)
-        
     }
     
     // MARK: - Status
@@ -95,9 +84,7 @@ open class AtomicBlockOperation<T>: BasicOperation {
     /// Operation queue status.
     /// To observe changes to this value, supply a closure to the `statusHandler` property.
     public final var status: OperationQueueStatus {
-        
         operationQueue.status
-        
     }
     
     /// Handler called any time the `status` property changes.
@@ -114,14 +101,15 @@ open class AtomicBlockOperation<T>: BasicOperation {
     
     // MARK: - Init
     
-    public init(type operationQueueType: OperationQueueType,
-                qualityOfService: QualityOfService? = nil,
-                resetProgressWhenFinished: Bool = false,
-                label: String? = nil,
-                weight: BasicOperationQueue.ProgressWeight = .default(),
-                initialMutableValue: T,
-                statusHandler: BasicOperationQueue.StatusHandler? = nil) {
-        
+    public init(
+        type operationQueueType: OperationQueueType,
+        qualityOfService: QualityOfService? = nil,
+        resetProgressWhenFinished: Bool = false,
+        label: String? = nil,
+        weight: BasicOperationQueue.ProgressWeight = .default(),
+        initialMutableValue: T,
+        statusHandler: BasicOperationQueue.StatusHandler? = nil
+    ) {
         // assign properties
         operationQueue = AtomicOperationQueue(
             type: operationQueueType,
@@ -140,18 +128,16 @@ open class AtomicBlockOperation<T>: BasicOperation {
         
         if let qualityOfService = qualityOfService {
             self.qualityOfService = qualityOfService
-            self.operationQueue.qualityOfService = qualityOfService
+            operationQueue.qualityOfService = qualityOfService
         }
         
         // set up observers
         addObservers()
-        
     }
     
     // MARK: - Overrides
     
-    public final override func main() {
-        
+    override public final func main() {
         guard mainShouldStart() else { return }
         setupBlock?(self)
         
@@ -165,13 +151,12 @@ open class AtomicBlockOperation<T>: BasicOperation {
         // this ensures that the operation runs synchronously
         // which mirrors the behavior of BlockOperation
         while !isFinished {
-            usleep(10_000) // 10ms
+            usleep(10000) // 10ms
             
-            //Thread.sleep(forTimeInterval: 0.010)
+            // Thread.sleep(forTimeInterval: 0.010)
             
-            //RunLoop.current.run(until: Date().addingTimeInterval(0.010))
+            // RunLoop.current.run(until: Date().addingTimeInterval(0.010))
         }
-        
     }
     
     // MARK: - KVO Observers
@@ -179,12 +164,10 @@ open class AtomicBlockOperation<T>: BasicOperation {
     /// Retain property observers. For safety, this array must be emptied on class deinit.
     private var observers: [NSKeyValueObservation] = []
     private func addObservers() {
-        
         // self.isCancelled
         
         observers.append(
-            observe(\.isCancelled, options: [.new])
-            { [self, operationQueue] _, _ in
+            observe(\.isCancelled, options: [.new]) { [self, operationQueue] _, _ in
                 // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
                 if isCancelled {
@@ -198,8 +181,7 @@ open class AtomicBlockOperation<T>: BasicOperation {
         // self.qualityOfService
         
         observers.append(
-            observe(\.qualityOfService, options: [.new])
-            { [self, operationQueue] _, _ in
+            observe(\.qualityOfService, options: [.new]) { [self, operationQueue] _, _ in
                 // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
                 // for some reason, change.newValue is nil here. so just read from the property directly.
@@ -214,13 +196,13 @@ open class AtomicBlockOperation<T>: BasicOperation {
         
         observers.append(
             operationQueue.observe(\.operationCount, options: [.new])
-            { [self, operationQueue] _, _ in
-                // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
+                { [self, operationQueue] _, _ in
+                    // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
-                if operationQueue?.operationCount == 0 {
-                    completeOperation()
+                    if operationQueue?.operationCount == 0 {
+                        completeOperation()
+                    }
                 }
-            }
         )
         
         // self.operationQueue.progress.isFinished
@@ -228,38 +210,32 @@ open class AtomicBlockOperation<T>: BasicOperation {
         
         observers.append(
             operationQueue.progress.observe(\.isFinished, options: [.new])
-            { [self, operationQueue] _, _ in
-                // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
+                { [self, operationQueue] _, _ in
+                    // !!! DO NOT USE [weak self] HERE. MUST BE STRONG SELF !!!
                 
-                if operationQueue?.progress.isFinished == true {
-                    completeOperation()
+                    if operationQueue?.progress.isFinished == true {
+                        completeOperation()
+                    }
                 }
-            }
         )
-        
     }
     
     private func removeObservers() {
-        
         observers.forEach { $0.invalidate() } // for extra safety, invalidate them first
         observers.removeAll()
     }
     
     deinit {
-        
         setupBlock = nil
         
         // this is very important or it may result in random crashes if the KVO observers aren't nuked at the appropriate time
         removeObservers()
-        
     }
-    
 }
 
 // MARK: - Proxy methods
 
 extension AtomicBlockOperation {
-    
     /// Add an operation block operating on the shared mutable value.
     ///
     /// - returns: The new operation.
@@ -270,13 +246,11 @@ extension AtomicBlockOperation {
         dependencies: [Operation] = [],
         _ block: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) -> ClosureOperation {
-        
         operationQueue.addOperation(
             label: label,
             weight: weight,
             dependencies: dependencies, block
         )
-        
     }
     
     /// Add an operation block operating on the shared mutable value.
@@ -288,32 +262,32 @@ extension AtomicBlockOperation {
         label: String? = nil,
         weight: BasicOperationQueue.ProgressWeight = .default(),
         dependencies: [Operation] = [],
-        _ block: @escaping (_ operation: InteractiveClosureOperation,
-                            _ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
+        _ block: @escaping (
+            _ operation: InteractiveClosureOperation,
+            _ atomicValue: AtomicOperationQueue<T>.VariableAccess
+        ) -> Void
     ) -> InteractiveClosureOperation {
-        
         operationQueue.addInteractiveOperation(
             label: label,
             weight: weight,
             dependencies: dependencies, block
         )
-        
     }
     
     /// Add an operation to the operation queue.
     public final func addOperation(_ op: Operation) {
-        
         operationQueue.addOperation(op)
-        
     }
     
     /// Add operations to the operation queue.
-    public final func addOperations(_ ops: [Operation],
-                                    waitUntilFinished: Bool) {
-        
-        operationQueue.addOperations(ops,
-                                     waitUntilFinished: waitUntilFinished)
-        
+    public final func addOperations(
+        _ ops: [Operation],
+        waitUntilFinished: Bool
+    ) {
+        operationQueue.addOperations(
+            ops,
+            waitUntilFinished: waitUntilFinished
+        )
     }
     
     /// Add a barrier block operation to the operation queue.
@@ -323,50 +297,40 @@ extension AtomicBlockOperation {
     public final func addBarrierBlock(
         _ barrier: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) {
-        
         operationQueue.addBarrierBlock(barrier)
-        
     }
     
     /// Blocks the current thread until all the receiver’s queued and executing operations finish executing.
     public func waitUntilAllOperationsAreFinished(timeout: TimeInterval? = nil) {
-        
         if let timeout = timeout {
             operationQueue.waitUntilAllOperationsAreFinished(timeout: timeout)
         } else {
             operationQueue.waitUntilAllOperationsAreFinished()
         }
-        
     }
-    
 }
 
 // MARK: - Blocks
 
 extension AtomicBlockOperation {
-    
     /// Add a setup block that runs when the `AtomicBlockOperation` starts.
     public final func setSetupBlock(
         _ block: @escaping (_ operation: AtomicBlockOperation<T>) -> Void
     ) {
-        
         setupBlock = block
-        
     }
     
     /// Add a completion block that runs when the `AtomicBlockOperation` completes all its operations.
     public final func setCompletionBlock(
         _ block: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) {
-        
         completionBlock = { [weak self] in
             guard let self = self else { return }
-            let varAccess = AtomicOperationQueue<T>.VariableAccess(operationQueue: self.operationQueue)
+            let varAccess = AtomicOperationQueue<T>
+                .VariableAccess(operationQueue: self.operationQueue)
             block(varAccess)
         }
-        
     }
-    
 }
 
 #endif

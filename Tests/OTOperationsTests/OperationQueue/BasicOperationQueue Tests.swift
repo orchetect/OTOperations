@@ -10,41 +10,35 @@ import XCTestUtils
 @testable import OTOperations
 
 final class BasicOperationQueue_Tests: XCTestCase {
-    
     /// Serial FIFO queue.
     func testOperationQueueType_serialFIFO() {
-        
         let opQ = BasicOperationQueue(type: .serialFIFO)
         
         XCTAssertEqual(opQ.maxConcurrentOperationCount, 1)
-        
     }
     
     /// Automatic concurrency.
     func testOperationQueueType_automatic() {
-        
         let opQ = BasicOperationQueue(type: .concurrentAutomatic)
         
         print(opQ.maxConcurrentOperationCount)
         
-        XCTAssertEqual(opQ.maxConcurrentOperationCount,
-                       OperationQueue.defaultMaxConcurrentOperationCount)
-        
+        XCTAssertEqual(
+            opQ.maxConcurrentOperationCount,
+            OperationQueue.defaultMaxConcurrentOperationCount
+        )
     }
     
     /// Specific number of concurrent operations.
     func testOperationQueueType_specific() {
-        
         let opQ = BasicOperationQueue(type: .concurrent(max: 2))
         
         print(opQ.maxConcurrentOperationCount)
         
         XCTAssertEqual(opQ.maxConcurrentOperationCount, 2)
-        
     }
     
     func testLastAddedOperation() {
-        
         let opQ = BasicOperationQueue(type: .serialFIFO)
         opQ.isSuspended = true
         XCTAssertEqual(opQ.lastAddedOperation, nil)
@@ -58,15 +52,15 @@ final class BasicOperationQueue_Tests: XCTestCase {
         op = nil
         opQ.isSuspended = false
         wait(for: opQ.lastAddedOperation, equals: nil, timeout: 0.5)
-        
     }
     
     func testResetProgressWhenFinished_False() {
+        let opQ = BasicOperationQueue(
+            type: .serialFIFO,
+            resetProgressWhenFinished: false
+        )
         
-        let opQ = BasicOperationQueue(type: .serialFIFO,
-                                      resetProgressWhenFinished: false)
-        
-        for _ in 1...10 {
+        for _ in 1 ... 10 {
             opQ.addOperation { }
         }
         
@@ -75,7 +69,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
         
-        for _ in 1...10 {
+        for _ in 1 ... 10 {
             opQ.addOperation { }
         }
         
@@ -83,35 +77,37 @@ final class BasicOperationQueue_Tests: XCTestCase {
         wait(for: opQ.operationCount, equals: 0, timeout: 0.5)
         
         XCTAssertEqual(opQ.progress.totalUnitCount, 20 * 100)
-        
     }
     
     func testResetProgressWhenFinished_True_CancelMidway() {
-        
         class BasicOperationQueueResetTest {
-            let opQ = AtomicOperationQueue(type: .concurrentAutomatic,
-                                           resetProgressWhenFinished: true,
-                                           initialMutableValue: 0)
+            let opQ = AtomicOperationQueue(
+                type: .concurrentAutomatic,
+                resetProgressWhenFinished: true,
+                initialMutableValue: 0
+            )
             init() {
-                for _ in 1...10 {
-                    opQ.addOperation(.atomicBlock(type: .serialFIFO,
-                                                  initialMutableValue: 0) { operation in
+                for _ in 1 ... 10 {
+                    opQ.addOperation(.atomicBlock(
+                        type: .serialFIFO,
+                        initialMutableValue: 0
+                    ) { operation in
                         operation.addInteractiveOperation(label: nil) { operation, atomicValue in
-                            usleep(10_000 * UInt32.random(in: 1...10))
+                            usleep(10000 * UInt32.random(in: 1 ... 10))
                             if operation.mainShouldAbort() { return }
-                            usleep(10_000 * UInt32.random(in: 1...10))
+                            usleep(10000 * UInt32.random(in: 1 ... 10))
                             atomicValue.mutate { $0 += 1 }
-                            usleep(10_000 * UInt32.random(in: 1...10))
+                            usleep(10000 * UInt32.random(in: 1 ... 10))
                             operation.progress.completedUnitCount = 0
                             operation.completeOperation()
                         }
                     })
                     opQ.addInteractiveOperation(label: nil) { operation, atomicValue in
-                        usleep(10_000 * UInt32.random(in: 1...10))
+                        usleep(10000 * UInt32.random(in: 1 ... 10))
                         if operation.mainShouldAbort() { return }
-                        usleep(10_000 * UInt32.random(in: 1...10))
+                        usleep(10000 * UInt32.random(in: 1 ... 10))
                         atomicValue.mutate { $0 += 1 }
-                        usleep(10_000 * UInt32.random(in: 1...10))
+                        usleep(10000 * UInt32.random(in: 1 ... 10))
                         operation.progress.completedUnitCount = 0
                         operation.completeOperation()
                     }
@@ -134,17 +130,17 @@ final class BasicOperationQueue_Tests: XCTestCase {
         wait(for: qTest.opQ.progress.isFinished, timeout: 0.5)
         wait(for: qTest.opQ.progress.completedUnitCount, equals: 1, timeout: 0.5)
         wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 0.5)
-        
     }
     
     func testResetProgressWhenFinished_True() {
-        
         class AtomicOperationQueueProgressTest {
             var statuses: [OperationQueueStatus] = []
             
-            let opQ = AtomicOperationQueue(type: .serialFIFO,
-                                           resetProgressWhenFinished: true,
-                                           initialMutableValue: 0)
+            let opQ = AtomicOperationQueue(
+                type: .serialFIFO,
+                resetProgressWhenFinished: true,
+                initialMutableValue: 0
+            )
             
             init() {
                 opQ.labelProgress.label = "Main"
@@ -166,34 +162,34 @@ final class BasicOperationQueue_Tests: XCTestCase {
             qTest.opQ.cancelAllOperations()
             
             print("Running 10 operations...")
-            for _ in 1...10 {
+            for _ in 1 ... 10 {
                 // pick random operation types to add,
                 // each taking the same amount of time to execute
-                switch (0...0).randomElement() { //(0...4).randomElement()! {
+                switch (0 ... 0).randomElement() { // (0...4).randomElement()! {
                 case 0:
                     qTest.opQ.addOperation {
                         usleep(100_000)
                     }
-                //case 1:
+                // case 1:
                 //    qTest.opQ.addOperation(
                 //        .basic {
                 //            usleep(100_000)
                 //        }
                 //    )
-                //case 2:
+                // case 2:
                 //    qTest.opQ.addOperation(
                 //        .interactive { operation in
                 //            usleep(100_000)
                 //        }
                 //    )
-                //case 3:
+                // case 3:
                 //    qTest.opQ.addOperation(
                 //        .interactiveAsync { operation in
                 //            usleep(100_000)
                 //            operation.completeOperation()
                 //        }
                 //    )
-                //case 4:
+                // case 4:
                 //    qTest.opQ.addOperation(
                 //        .atomicBlock(type: .concurrentAutomatic,
                 //                     initialMutableValue: 0) { opBlock in
@@ -203,7 +199,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
                 //                     }
                 //    )
                 default:
-                    XCTFail() ; return
+                    XCTFail(); return
                 }
             }
             
@@ -309,14 +305,14 @@ final class BasicOperationQueue_Tests: XCTestCase {
         } else {
             XCTFail()
         }
-        
     }
     
     func testStatus() {
-        
         func runTest(resetWhenFinished: Bool) {
-            let opQ = BasicOperationQueue(type: .serialFIFO,
-                                          resetProgressWhenFinished: resetWhenFinished)
+            let opQ = BasicOperationQueue(
+                type: .serialFIFO,
+                resetProgressWhenFinished: resetWhenFinished
+            )
             
             opQ.statusHandler = { newStatus, oldStatus in
                 print(oldStatus, newStatus)
@@ -332,7 +328,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
             }
             
             switch opQ.status {
-            case .inProgress(let fractionCompleted, let label, let desc):
+            case let .inProgress(fractionCompleted, label, desc):
                 XCTAssertEqual(fractionCompleted, 0.0)
                 _ = label // don't test label content, for now
                 _ = desc // don't test desc content, for now
@@ -357,9 +353,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
         
         runTest(resetWhenFinished: false)
         runTest(resetWhenFinished: true)
-        
     }
-    
 }
 
 #endif

@@ -65,7 +65,6 @@ import Foundation
 ///
 /// - note: Inherits from both `BasicAsyncOperation` and `BasicOperation`.
 public final class InteractiveAsyncClosureOperation: BasicAsyncOperation {
-    
     public final let queue: DispatchQueue?
     public final let mainBlock: (_ operation: InteractiveAsyncClosureOperation) -> Void
     
@@ -75,15 +74,12 @@ public final class InteractiveAsyncClosureOperation: BasicAsyncOperation {
         weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping (_ operation: InteractiveAsyncClosureOperation) -> Void
     ) {
-        
         self.queue = queue
         self.mainBlock = mainBlock
         super.init(label: label, weight: weight)
-        
     }
     
     override public final func main() {
-        
         guard mainShouldStart() else { return }
         
         if let queue = queue {
@@ -96,9 +92,7 @@ public final class InteractiveAsyncClosureOperation: BasicAsyncOperation {
         }
         
         // completeOperation() must be called manually in the block since the block runs async
-        
     }
-    
 }
 
 #endif

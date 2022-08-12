@@ -8,13 +8,11 @@
 import Foundation
 import OTOperations
 
-extension Collection where Element : Equatable {
-    
+extension Collection where Element: Equatable {
     /// Returns a new array removing identical elements that are sequential (neighboring), maintaining original array order.
     @_disfavoredOverload
     func removingSequentialDuplicates() -> [Element] {
-        
-        guard self.count > 0 else { return [] }
+        guard !isEmpty else { return [] }
         
         var out: [Element] = []
         
@@ -27,9 +25,7 @@ extension Collection where Element : Equatable {
         }
         
         return out
-        
     }
-    
 }
 
 #endif

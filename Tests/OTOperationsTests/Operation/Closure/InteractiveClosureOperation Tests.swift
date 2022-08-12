@@ -9,9 +9,7 @@ import XCTest
 import OTOperations
 
 final class InteractiveClosureOperation_Tests: XCTestCase {
-    
     func testOpRun() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         
         let op = InteractiveClosureOperation { operation in
@@ -37,11 +35,9 @@ final class InteractiveClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     func testOpNotRun() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         mainBlockExp.isInverted = true
         
@@ -68,12 +64,10 @@ final class InteractiveClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Test in the context of an OperationQueue. Run is implicit.
     func testQueue() {
-        
         let opQ = OperationQueue()
         
         let mainBlockExp = expectation(description: "Main Block Called")
@@ -104,12 +98,10 @@ final class InteractiveClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Test that start() runs synchronously. Run it.
     func testOp_SynchronousTest_Run() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         
         let completionBlockExp = expectation(description: "Completion Block Called")
@@ -137,9 +129,7 @@ final class InteractiveClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.isExecuting)
         
         wait(for: [mainBlockExp, completionBlockExp], timeout: 2)
-        
     }
-    
 }
 
 #endif

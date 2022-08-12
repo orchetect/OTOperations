@@ -10,31 +10,31 @@ import XCTestUtils
 @testable import OTOperations
 
 final class AtomicBlockOperation_Tests: XCTestCase {
-    
     func testEmpty() {
-        
-        let op = AtomicBlockOperation(type: .concurrentAutomatic,
-                                      initialMutableValue: [Int : [Int]]())
+        let op = AtomicBlockOperation(
+            type: .concurrentAutomatic,
+            initialMutableValue: [Int: [Int]]()
+        )
         
         op.start()
         
         XCTAssertTrue(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Standalone operation, serial FIFO queue mode. Run it.
     func testOp_serialFIFO_Run() {
-        
-        let op = AtomicBlockOperation(type: .serialFIFO,
-                                      initialMutableValue: [Int]())
+        let op = AtomicBlockOperation(
+            type: .serialFIFO,
+            initialMutableValue: [Int]()
+        )
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
         let dataVerificationExp = expectation(description: "Data Verification")
         
-        for val in 1...100 {
+        for val in 1 ... 100 {
             op.addOperation { $0.mutate { $0.append(val) } }
         }
         
@@ -43,7 +43,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             
             // check that all operations executed and they are in serial FIFO order
             v.mutate { value in
-                XCTAssertEqual(value, Array(1...100))
+                XCTAssertEqual(value, Array(1 ... 100))
                 dataVerificationExp.fulfill()
             }
         }
@@ -56,20 +56,20 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Standalone operation, concurrent threading queue mode. Run it.
     func testOp_concurrentAutomatic_Run() {
-        
-        let op = AtomicBlockOperation(type: .concurrentAutomatic,
-                                      initialMutableValue: [Int]())
+        let op = AtomicBlockOperation(
+            type: .concurrentAutomatic,
+            initialMutableValue: [Int]()
+        )
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
         let dataVerificationExp = expectation(description: "Data Verification")
         
-        for val in 1...100 {
+        for val in 1 ... 100 {
             op.addOperation { $0.mutate { $0.append(val) } }
         }
         
@@ -81,7 +81,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                 XCTAssertEqual(value.count, 100)
                 
                 // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
-                XCTAssert(Array(1...100).allSatisfy(value.contains))
+                XCTAssert(Array(1 ... 100).allSatisfy(value.contains))
                 
                 dataVerificationExp.fulfill()
             }
@@ -92,20 +92,20 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         wait(for: [completionBlockExp, dataVerificationExp], timeout: 1)
         
         XCTAssertEqual(op.value.count, 100)
-        XCTAssert(Array(1...100).allSatisfy(op.value.contains))
+        XCTAssert(Array(1 ... 100).allSatisfy(op.value.contains))
         
         // state
         XCTAssertTrue(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Test as a standalone operation. Do not run it.
     func testOp_concurrentAutomatic_NotRun() {
-        
-        let op = AtomicBlockOperation(type: .concurrentAutomatic,
-                                      initialMutableValue: [Int]())
+        let op = AtomicBlockOperation(
+            type: .concurrentAutomatic,
+            initialMutableValue: [Int]()
+        )
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         completionBlockExp.isInverted = true
@@ -113,7 +113,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         let dataVerificationExp = expectation(description: "Data Verification")
         dataVerificationExp.isInverted = true
         
-        for val in 1...100 {
+        for val in 1 ... 100 {
             op.addOperation { $0.mutate { $0.append(val) } }
         }
         
@@ -125,7 +125,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                 XCTAssertEqual(value.count, 100)
                 
                 // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
-                XCTAssert(Array(1...100).allSatisfy(value.contains))
+                XCTAssert(Array(1 ... 100).allSatisfy(value.contains))
                 
                 dataVerificationExp.fulfill()
             }
@@ -137,14 +137,14 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         XCTAssertFalse(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Standalone operation, concurrent threading queue mode. Run it.
     func testOp_concurrentSpecificMax_Run() {
-        
-        let op = AtomicBlockOperation(type: .concurrent(max: 10),
-                                      initialMutableValue: [Int]())
+        let op = AtomicBlockOperation(
+            type: .concurrent(max: 10),
+            initialMutableValue: [Int]()
+        )
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
@@ -152,7 +152,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         
         let atomicBlockCompletedExp = expectation(description: "AtomicBlockOperation Completed")
         
-        for val in 1...100 {
+        for val in 1 ... 100 {
             op.addOperation { $0.mutate { $0.append(val) } }
         }
         
@@ -164,7 +164,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                 XCTAssertEqual(value.count, 100)
                 
                 // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
-                XCTAssert(Array(1...100).allSatisfy(value.contains))
+                XCTAssert(Array(1 ... 100).allSatisfy(value.contains))
                 
                 dataVerificationExp.fulfill()
             }
@@ -178,23 +178,23 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         wait(for: [completionBlockExp, dataVerificationExp, atomicBlockCompletedExp], timeout: 1)
         
         XCTAssertEqual(op.value.count, 100)
-        XCTAssert(Array(1...100).allSatisfy(op.value.contains))
+        XCTAssert(Array(1 ... 100).allSatisfy(op.value.contains))
         
         // state
         XCTAssertTrue(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Test in the context of an OperationQueue. Run is implicit.
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testOp_concurrentAutomatic_Queue() {
-        
         let opQ = OperationQueue()
                 
-        let op = AtomicBlockOperation(type: .concurrentAutomatic,
-                                      initialMutableValue: [Int]())
+        let op = AtomicBlockOperation(
+            type: .concurrentAutomatic,
+            initialMutableValue: [Int]()
+        )
         
         // test default qualityOfService to check baseline state
         XCTAssertEqual(op.qualityOfService, .default)
@@ -205,7 +205,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         
         let dataVerificationExp = expectation(description: "Data Verification")
         
-        for val in 1...100 {
+        for val in 1 ... 100 {
             op.addOperation { v in
                 // QoS should be inherited from the AtomicBlockOperation QoS
                 XCTAssertEqual(Thread.current.qualityOfService, .userInitiated)
@@ -223,7 +223,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                 XCTAssertEqual(value.count, 100)
                 
                 // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
-                XCTAssert(Array(1...100).allSatisfy(value.contains))
+                XCTAssert(Array(1 ... 100).allSatisfy(value.contains))
                 
                 dataVerificationExp.fulfill()
             }
@@ -241,20 +241,20 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         XCTAssertTrue(op.isFinished)
         XCTAssertFalse(op.isCancelled)
         XCTAssertFalse(op.isExecuting)
-        
     }
     
     /// Standalone operation, serial FIFO queue mode. Test that start() runs synchronously. Run it.
     func testOp_serialFIFO_SynchronousTest_Run() {
-        
-        let op = AtomicBlockOperation(type: .serialFIFO,
-                                      initialMutableValue: [Int]())
+        let op = AtomicBlockOperation(
+            type: .serialFIFO,
+            initialMutableValue: [Int]()
+        )
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
-        for val in 1...100 { // will take 1 second to complete
+        for val in 1 ... 100 { // will take 1 second to complete
             op.addOperation { v in
-                usleep(10_000)
+                usleep(10000)
                 v.mutate { $0.append(val) }
             }
         }
@@ -266,7 +266,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         op.start()
         
         // check that all operations executed and they are in serial FIFO order
-        XCTAssertEqual(op.value, Array(1...100))
+        XCTAssertEqual(op.value, Array(1 ... 100))
         
         // state
         XCTAssertTrue(op.isFinished)
@@ -274,26 +274,28 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         XCTAssertFalse(op.isExecuting)
         
         wait(for: [completionBlockExp], timeout: 2)
-        
     }
     
     /// Test a `AtomicBlockOperation` that enqueues multiple `AtomicBlockOperation`s and ensure data mutability works as expected.
     func testNested() {
-        
-        let mainOp = AtomicBlockOperation(type: .concurrentAutomatic,
-                                          initialMutableValue: [Int : [Int]]())
+        let mainOp = AtomicBlockOperation(
+            type: .concurrentAutomatic,
+            initialMutableValue: [Int: [Int]]()
+        )
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
-        var mainVal: [Int : [Int]] = [:]
+        var mainVal: [Int: [Int]] = [:]
         
-        for keyNum in 1...10 {
+        for keyNum in 1 ... 10 {
             mainOp.addOperation { v in
-                let subOp = AtomicBlockOperation(type: .concurrentAutomatic,
-                                                 initialMutableValue: [Int]())
+                let subOp = AtomicBlockOperation(
+                    type: .concurrentAutomatic,
+                    initialMutableValue: [Int]()
+                )
                 subOp.addOperation { v in
                     v.mutate { value in
-                        for valueNum in 1...200 {
+                        for valueNum in 1 ... 200 {
                             value.append(valueNum)
                         }
                     }
@@ -325,25 +327,27 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         XCTAssertFalse(mainOp.isExecuting)
         
         XCTAssertEqual(mainVal.count, 10)
-        XCTAssertEqual(mainVal.keys.sorted(), Array(1...10))
-        XCTAssert(mainVal.values.allSatisfy({ $0.sorted() == Array(1...200)}))
-        
+        XCTAssertEqual(mainVal.keys.sorted(), Array(1 ... 10))
+        XCTAssert(mainVal.values.allSatisfy { $0.sorted() == Array(1 ... 200) })
     }
     
     func testNested_Cancel() {
-        
-        let mainOp = AtomicBlockOperation(type: .concurrentAutomatic,
-                                          initialMutableValue: [Int : [Int]]())
+        let mainOp = AtomicBlockOperation(
+            type: .concurrentAutomatic,
+            initialMutableValue: [Int: [Int]]()
+        )
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
-        var mainVal: [Int : [Int]] = [:]
+        var mainVal: [Int: [Int]] = [:]
         
-        for keyNum in 1...10 {
-            let subOp = AtomicBlockOperation(type: .concurrentAutomatic,
-                                             initialMutableValue: [Int]())
+        for keyNum in 1 ... 10 {
+            let subOp = AtomicBlockOperation(
+                type: .concurrentAutomatic,
+                initialMutableValue: [Int]()
+            )
             var refs: [Operation] = []
-            for valueNum in 1...20 {
+            for valueNum in 1 ... 20 {
                 let ref = subOp.addInteractiveOperation { op, v in
                     if op.mainShouldAbort() { return }
                     usleep(200_000)
@@ -386,31 +390,34 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         
         wait(for: [completionBlockExp], timeout: 1)
         
-        //XCTAssertEqual(mainOp.operationQueue.operationCount, 0)
+        // XCTAssertEqual(mainOp.operationQueue.operationCount, 0)
         
         // state
         XCTAssertTrue(mainOp.isFinished)
         XCTAssertTrue(mainOp.isCancelled)
-        XCTAssertFalse(mainOp.isExecuting) // TODO: technically this should be true, but it gets set to false when the completion method gets called even if async code is still running
+        XCTAssertFalse(
+            mainOp
+                .isExecuting
+        ) // TODO: technically this should be true, but it gets set to false when the completion method gets called even if async code is still running
         
-        let expectedArray = (1...10).reduce(into: [Int: [Int]]()) {
-            $0[$1] = Array(1...200)
+        let expectedArray = (1 ... 10).reduce(into: [Int: [Int]]()) {
+            $0[$1] = Array(1 ... 200)
         }
         XCTAssertNotEqual(mainVal, expectedArray)
-        
     }
     
     /// Ensure that nested progress objects successfully result in the topmost queue calling statusHandler at every increment of all progress children at every level.
     func testProgress() {
-        
         class AtomicOperationQueueProgressTest {
             var statuses: [OperationQueueStatus] = []
             
-            let mainOp = AtomicOperationQueue(type: .serialFIFO,
-                                              qualityOfService: .default,
-                                              initiallySuspended: true,
-                                              resetProgressWhenFinished: true,
-                                              initialMutableValue: 0)
+            let mainOp = AtomicOperationQueue(
+                type: .serialFIFO,
+                qualityOfService: .default,
+                initiallySuspended: true,
+                resetProgressWhenFinished: true,
+                initialMutableValue: 0
+            )
             
             init() {
                 mainOp.statusHandler = { newStatus, oldStatus in
@@ -429,19 +436,21 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         func runTest() {
             // 5 ops, each with 2 ops, each with 2 units of progress.
             // should equate to 20 total main progress updates 5% apart
-            for _ in 1...5 {
-                let subOp = AtomicBlockOperation(type: .serialFIFO,
-                                                 label: "Top",
-                                                 initialMutableValue: 0)
+            for _ in 1 ... 5 {
+                let subOp = AtomicBlockOperation(
+                    type: .serialFIFO,
+                    label: "Top",
+                    initialMutableValue: 0
+                )
                 
-                for subOpNum in 1...2 {
+                for subOpNum in 1 ... 2 {
                     subOp.addInteractiveOperation(label: "Sub\(subOpNum)")
-                    { operation, atomicValue in
-                        operation.progress.totalUnitCount = 2
+                        { operation, atomicValue in
+                            operation.progress.totalUnitCount = 2
                         
-                        operation.progress.completedUnitCount = 1
-                        operation.progress.completedUnitCount = 2
-                    }
+                            operation.progress.completedUnitCount = 1
+                            operation.progress.completedUnitCount = 2
+                        }
                 }
                 
                 qTest.mainOp.addOperation(subOp)
@@ -531,9 +540,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         } else {
             XCTFail()
         }
-        
     }
-    
 }
 
 #endif

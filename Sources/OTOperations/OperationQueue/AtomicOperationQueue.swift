@@ -10,10 +10,9 @@ import OTAtomics
 
 /// An `OperationQueue` subclass that passes shared thread-safe variable into operation closures.
 /// Concurrency type can be specified.
-/// 
+///
 /// - note: Inherits from `BasicOperationQueue`.
 open class AtomicOperationQueue<T>: BasicOperationQueue {
-    
     /// The thread-safe shared mutable value that all operation blocks operate upon.
     @OTAtomicsThreadSafe public final var sharedMutableValue: T
     
@@ -28,13 +27,14 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
         label: String? = nil,
         statusHandler: BasicOperationQueue.StatusHandler? = nil
     ) {
+        sharedMutableValue = initialMutableValue
         
-        self.sharedMutableValue = initialMutableValue
-        
-        super.init(type: operationQueueType,
-                   label: label,
-                   resetProgressWhenFinished: resetProgressWhenFinished,
-                   statusHandler: statusHandler)
+        super.init(
+            type: operationQueueType,
+            label: label,
+            resetProgressWhenFinished: resetProgressWhenFinished,
+            statusHandler: statusHandler
+        )
         
         if let qualityOfService = qualityOfService {
             self.qualityOfService = qualityOfService
@@ -43,7 +43,6 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
         if initiallySuspended {
             isSuspended = true
         }
-        
     }
     
     // MARK: - Shared Mutable Value Methods
@@ -88,14 +87,14 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
         dependencies: [Operation] = [],
         _ block: @escaping (_ atomicValue: VariableAccess) -> Void
     ) -> ClosureOperation {
-        
-        let op = createOperation(label: label,
-                                 weight: weight,
-                                 block)
+        let op = createOperation(
+            label: label,
+            weight: weight,
+            block
+        )
         dependencies.forEach { op.addDependency($0) }
         addOperation(op)
         return op
-            
     }
     
     // NOTE: when updating this inline docs block, copy it over to
@@ -147,17 +146,19 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
         label: String? = nil,
         weight: ProgressWeight = .default(),
         dependencies: [Operation] = [],
-        _ block: @escaping (_ operation: InteractiveClosureOperation,
-                            _ atomicValue: VariableAccess) -> Void
+        _ block: @escaping (
+            _ operation: InteractiveClosureOperation,
+            _ atomicValue: VariableAccess
+        ) -> Void
     ) -> InteractiveClosureOperation {
-        
-        let op = createInteractiveOperation(label: label,
-                                            weight: weight,
-                                            block)
+        let op = createInteractiveOperation(
+            label: label,
+            weight: weight,
+            block
+        )
         dependencies.forEach { op.addDependency($0) }
         addOperation(op)
         return op
-        
     }
     
     /// Add a barrier block operation to the operation queue.
@@ -167,13 +168,11 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     public final func addBarrierBlock(
         _ barrier: @escaping (_ atomicValue: VariableAccess) -> Void
     ) {
-        
         addBarrierBlock { [weak self] in
             guard let self = self else { return }
             let varAccess = VariableAccess(operationQueue: self)
             barrier(varAccess)
         }
-        
     }
     
     // MARK: - Factory Methods
@@ -185,15 +184,14 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
         weight: ProgressWeight = .default(),
         _ block: @escaping (_ atomicValue: VariableAccess) -> Void
     ) -> ClosureOperation {
-        
-        ClosureOperation(label: label,
-                         weight: weight)
-        { [weak self] in
+        ClosureOperation(
+            label: label,
+            weight: weight
+        ) { [weak self] in
             guard let self = self else { return }
             let varAccess = VariableAccess(operationQueue: self)
             block(varAccess)
         }
-        
     }
     
     /// Internal for debugging:
@@ -202,27 +200,25 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     internal final func createInteractiveOperation(
         label: String? = nil,
         weight: ProgressWeight = .default(),
-        _ block: @escaping (_ operation: InteractiveClosureOperation,
-                            _ atomicValue: VariableAccess) -> Void
+        _ block: @escaping (
+            _ operation: InteractiveClosureOperation,
+            _ atomicValue: VariableAccess
+        ) -> Void
     ) -> InteractiveClosureOperation {
-        
-        InteractiveClosureOperation(label: label,
-                                    weight: weight)
-        { [weak self] operation in
+        InteractiveClosureOperation(
+            label: label,
+            weight: weight
+        ) { [weak self] operation in
             guard let self = self else { return }
             let varAccess = VariableAccess(operationQueue: self)
             block(operation, varAccess)
         }
-        
     }
     
     /// Mutate the shared atomic variable in a closure.
     public func mutateValue(_ block: (inout T) -> Void) {
-        
         block(&sharedMutableValue)
-        
     }
-    
 }
 
 #endif

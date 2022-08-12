@@ -10,27 +10,27 @@ import XCTestUtils
 @testable import OTOperations
 
 final class AtomicOperationQueue_Tests: XCTestCase {
-    
     /// Serial FIFO queue.
     func testOp_serialFIFO_Run() {
-        
         func runTest(resetWhenFinished: Bool) {
             print("resetWhenFinished:", resetWhenFinished)
             
-            let opQ = AtomicOperationQueue(type: .serialFIFO,
-                                           resetProgressWhenFinished: resetWhenFinished,
-                                           initialMutableValue: [Int]())
+            let opQ = AtomicOperationQueue(
+                type: .serialFIFO,
+                resetProgressWhenFinished: resetWhenFinished,
+                initialMutableValue: [Int]()
+            )
             
-            for val in 1...100 {
+            for val in 1 ... 100 {
                 opQ.addOperation { $0.mutate { $0.append(val) } }
             }
             
             wait(for: opQ.status, equals: .idle, timeout: 1.0)
-            //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
-            //XCTAssertEqual(timeoutResult, .success)
+            // let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
+            // XCTAssertEqual(timeoutResult, .success)
             
             XCTAssertEqual(opQ.sharedMutableValue.count, 100)
-            XCTAssert(Array(1...100).allSatisfy(opQ.sharedMutableValue.contains))
+            XCTAssert(Array(1 ... 100).allSatisfy(opQ.sharedMutableValue.contains))
             
             XCTAssertEqual(opQ.operationCount, 0)
             XCTAssertFalse(opQ.isSuspended)
@@ -39,30 +39,30 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         
         runTest(resetWhenFinished: false)
         runTest(resetWhenFinished: true)
-        
     }
     
     /// Concurrent automatic threading. Run it.
     func testOp_concurrentAutomatic_Run() {
-        
         func runTest(resetWhenFinished: Bool) {
             print("resetWhenFinished:", resetWhenFinished)
             
-            let opQ = AtomicOperationQueue(type: .concurrentAutomatic,
-                                           resetProgressWhenFinished: resetWhenFinished,
-                                           initialMutableValue: [Int]())
+            let opQ = AtomicOperationQueue(
+                type: .concurrentAutomatic,
+                resetProgressWhenFinished: resetWhenFinished,
+                initialMutableValue: [Int]()
+            )
             
-            for val in 1...100 {
+            for val in 1 ... 100 {
                 opQ.addOperation { $0.mutate { $0.append(val) } }
             }
             
             wait(for: opQ.status, equals: .idle, timeout: 0.5)
-            //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
-            //XCTAssertEqual(timeoutResult, .success)
+            // let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
+            // XCTAssertEqual(timeoutResult, .success)
             
             XCTAssertEqual(opQ.sharedMutableValue.count, 100)
             // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
-            XCTAssert(Array(1...100).allSatisfy(opQ.sharedMutableValue.contains))
+            XCTAssert(Array(1 ... 100).allSatisfy(opQ.sharedMutableValue.contains))
             
             XCTAssertEqual(opQ.operationCount, 0)
             XCTAssertFalse(opQ.isSuspended)
@@ -71,23 +71,23 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         
         runTest(resetWhenFinished: false)
         runTest(resetWhenFinished: true)
-        
     }
     
     /// Concurrent automatic threading. Do not run it. Check status. Run it. Check status.
     func testOp_concurrentAutomatic_Pause_Run() {
-        
         func runTest(resetWhenFinished: Bool) {
             print("resetWhenFinished:", resetWhenFinished)
             
-            let opQ = AtomicOperationQueue(type: .concurrentAutomatic,
-                                           initiallySuspended: true,
-                                           resetProgressWhenFinished: resetWhenFinished,
-                                           initialMutableValue: [Int]())
+            let opQ = AtomicOperationQueue(
+                type: .concurrentAutomatic,
+                initiallySuspended: true,
+                resetProgressWhenFinished: resetWhenFinished,
+                initialMutableValue: [Int]()
+            )
             
             XCTAssertEqual(opQ.status, .paused)
             
-            for val in 1...100 {
+            for val in 1 ... 100 {
                 opQ.addOperation { $0.mutate { $0.append(val) } }
             }
             
@@ -100,59 +100,76 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             XCTAssertEqual(opQ.operationCount, 100)
             XCTAssertTrue(opQ.isSuspended)
             
-            wait(for: opQ.status, equals: .paused, timeout: 0.1,
-                 "resetWhenFinished: \(resetWhenFinished)")
+            wait(
+                for: opQ.status,
+                equals: .paused,
+                timeout: 0.1,
+                "resetWhenFinished: \(resetWhenFinished)"
+            )
             
             opQ.isSuspended = false
             
-            wait(for: opQ.status.isInProgress, timeout: 0.2,
-                 "status.isInProgress, resetWhenFinished: \(resetWhenFinished)")
+            wait(
+                for: opQ.status.isInProgress,
+                timeout: 0.2,
+                "status.isInProgress, resetWhenFinished: \(resetWhenFinished)"
+            )
             
-            wait(for: opQ.operationCount, equals: 0, timeout: 2.0,
-                 "resetWhenFinished: \(resetWhenFinished)")
+            wait(
+                for: opQ.operationCount,
+                equals: 0,
+                timeout: 2.0,
+                "resetWhenFinished: \(resetWhenFinished)"
+            )
             
             if resetWhenFinished {
-                wait(for: opQ.status, equals: .idle, timeout: 0.5,
-                     "resetWhenFinished: \(resetWhenFinished)")
+                wait(
+                    for: opQ.status,
+                    equals: .idle,
+                    timeout: 0.5,
+                    "resetWhenFinished: \(resetWhenFinished)"
+                )
             } else {
                 // TODO: - For Some reason, sometimes status does not transition to .idle
-                wait(for: opQ.status == .idle ||
+                wait(
+                    for: opQ.status == .idle ||
                         opQ.status.inProgressDescription == "100% completed",
-                     timeout: 0.5,
-                     "resetWhenFinished: \(resetWhenFinished)")
+                    timeout: 0.5,
+                    "resetWhenFinished: \(resetWhenFinished)"
+                )
             }
             XCTAssertEqual(opQ.sharedMutableValue.count, 100)
             // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
-            XCTAssert(Array(1...100).allSatisfy(opQ.sharedMutableValue.contains))
+            XCTAssert(Array(1 ... 100).allSatisfy(opQ.sharedMutableValue.contains))
         }
         
         runTest(resetWhenFinished: false)
         runTest(resetWhenFinished: true)
-        
     }
     
     /// Concurrent automatic threading. Run it.
     func testOp_concurrentSpecific_Run() {
-        
         func runTest(resetWhenFinished: Bool) {
             print("resetWhenFinished:", resetWhenFinished)
             
-            let opQ = AtomicOperationQueue(type: .concurrent(max: 10),
-                                           resetProgressWhenFinished: resetWhenFinished,
-                                           initialMutableValue: [Int]())
+            let opQ = AtomicOperationQueue(
+                type: .concurrent(max: 10),
+                resetProgressWhenFinished: resetWhenFinished,
+                initialMutableValue: [Int]()
+            )
             
-            for val in 1...100 {
+            for val in 1 ... 100 {
                 opQ.addOperation { $0.mutate { $0.append(val) } }
             }
             
             wait(for: opQ.status, equals: .idle, timeout: 1.0)
-            //let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
-            //XCTAssertEqual(timeoutResult, .success)
+            // let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: .seconds(1))
+            // XCTAssertEqual(timeoutResult, .success)
             
             wait(for: opQ.sharedMutableValue.count, equals: 100, timeout: 0.5)
             
             // this happens to be in serial order even though we are using concurrent threads and no operation dependencies are being used
-            XCTAssert(Array(1...100).allSatisfy(opQ.sharedMutableValue.contains))
+            XCTAssert(Array(1 ... 100).allSatisfy(opQ.sharedMutableValue.contains))
             
             XCTAssertEqual(opQ.operationCount, 0)
             XCTAssertFalse(opQ.isSuspended)
@@ -161,27 +178,27 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         
         runTest(resetWhenFinished: false)
         runTest(resetWhenFinished: true)
-        
     }
     
     /// Serial FIFO queue.
     /// Test the behavior of `addOperations()`. It should add operations in array order.
     func testOp_serialFIFO_AddOperations_Run() {
-        
         func runTest(resetWhenFinished: Bool) {
             print("resetWhenFinished:", resetWhenFinished)
             
-            let opQ = AtomicOperationQueue(type: .serialFIFO,
-                                           resetProgressWhenFinished: resetWhenFinished,
-                                           initialMutableValue: [Int]())
+            let opQ = AtomicOperationQueue(
+                type: .serialFIFO,
+                resetProgressWhenFinished: resetWhenFinished,
+                initialMutableValue: [Int]()
+            )
             var ops: [Operation] = []
             
             // first generate operation objects
-            for val in 1...50 {
+            for val in 1 ... 50 {
                 let op = opQ.createOperation { $0.mutate { $0.append(val) } }
                 ops.append(op)
             }
-            for val in 51...100 {
+            for val in 51 ... 100 {
                 let op = opQ.createInteractiveOperation { _, v in
                     v.mutate { $0.append(val) }
                 }
@@ -195,7 +212,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             XCTAssertEqual(timeoutResult, .success)
             
             XCTAssertEqual(opQ.sharedMutableValue.count, 100)
-            XCTAssert(Array(1...100).allSatisfy(opQ.sharedMutableValue.contains))
+            XCTAssert(Array(1 ... 100).allSatisfy(opQ.sharedMutableValue.contains))
             
             XCTAssertEqual(opQ.operationCount, 0)
             XCTAssertFalse(opQ.isSuspended)
@@ -204,25 +221,25 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         
         runTest(resetWhenFinished: false)
         runTest(resetWhenFinished: true)
-        
     }
     
     func testResetProgressWhenFinished_True() {
-        
         func runTest(resetWhenFinished: Bool) {
             print("resetWhenFinished:", resetWhenFinished)
             
-            let opQ = AtomicOperationQueue(type: .serialFIFO,
-                                           resetProgressWhenFinished: resetWhenFinished,
-                                           initialMutableValue: 0) // value doesn't matter
+            let opQ = AtomicOperationQueue(
+                type: .serialFIFO,
+                resetProgressWhenFinished: resetWhenFinished,
+                initialMutableValue: 0
+            ) // value doesn't matter
             
-            for _ in 1...10 {
-                opQ.addInteractiveOperation { _,_ in usleep(100_000) }
+            for _ in 1 ... 10 {
+                opQ.addInteractiveOperation { _, _ in usleep(100_000) }
             }
             
             XCTAssertEqual(opQ.progress.totalUnitCount, 10 * 100)
             
-            usleep(20_000)
+            usleep(20000)
             
             switch opQ.status {
             case .inProgress:
@@ -233,16 +250,16 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             
             wait(for: opQ.status, equals: .idle, timeout: 5.0)
             
-            wait(for: opQ.progress.totalUnitCount,
-                 equals: resetWhenFinished ? 1 : 1000,
-                 timeout: 0.5)
+            wait(
+                for: opQ.progress.totalUnitCount,
+                equals: resetWhenFinished ? 1 : 1000,
+                timeout: 0.5
+            )
         }
         
         runTest(resetWhenFinished: false)
         runTest(resetWhenFinished: true)
-        
     }
-    
 }
 
 #endif

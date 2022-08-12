@@ -39,7 +39,7 @@ import Foundation
 ///     }
 ///
 /// Add the operation to an `OperationQueue` or start it manually if not being inserted into an OperationQueue.
-/// 
+///
 ///     // if inserting into an OperationQueue:
 ///     let opQueue = OperationQueue()
 ///     opQueue.addOperation(op)
@@ -51,8 +51,7 @@ import Foundation
 ///
 /// - note: Inherits from `BasicOperation`.
 public final class AsyncClosureOperation: BasicOperation {
-    
-    public final override var isAsynchronous: Bool { true }
+    override public final var isAsynchronous: Bool { true }
     
     public final let queue: DispatchQueue?
     public final let mainBlock: () -> Void
@@ -63,15 +62,12 @@ public final class AsyncClosureOperation: BasicOperation {
         weight: BasicOperationQueue.ProgressWeight = .default(),
         _ mainBlock: @escaping () -> Void
     ) {
-        
         self.queue = queue
         self.mainBlock = mainBlock
         super.init(label: label, weight: weight)
-        
     }
     
     override public final func main() {
-        
         guard mainShouldStart() else { return }
         
         if let queue = queue {
@@ -84,9 +80,7 @@ public final class AsyncClosureOperation: BasicOperation {
             mainBlock()
             completeOperation()
         }
-        
     }
-    
 }
 
 #endif

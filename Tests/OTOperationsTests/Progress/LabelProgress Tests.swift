@@ -9,44 +9,36 @@ import XCTest
 @testable import OTOperations
 
 final class LabelProgress_Tests: XCTestCase {
-    
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
     
     func testInit() {
-        
         let main = LabelProgress()
         
         XCTAssertEqual(main.parent, nil)
         XCTAssertEqual(main.children, [])
         XCTAssertEqual(main.label, nil)
-        
     }
     
     func testInit_totalUnitCount() {
-        
         let main = LabelProgress(totalUnitCount: 1)
         
         XCTAssertEqual(main.parent, nil)
         XCTAssertEqual(main.children, [])
         XCTAssertEqual(main.label, nil)
         XCTAssertEqual(main.totalUnitCount, 1)
-        
     }
     
     func testInit_totalUnitCount_label() {
-        
         let main = LabelProgress(totalUnitCount: 1, label: "A label")
         
         XCTAssertEqual(main.parent, nil)
         XCTAssertEqual(main.children, [])
         XCTAssertEqual(main.label, "A label")
         XCTAssertEqual(main.totalUnitCount, 1)
-        
     }
     
     func testInit_parent_userInfo_label() {
-        
         let main = LabelProgress(totalUnitCount: 1)
         let childProg = LabelProgress(parent: nil, userInfo: nil, label: "A label")
         
@@ -55,11 +47,9 @@ final class LabelProgress_Tests: XCTestCase {
         
         XCTAssertEqual(childProg.parent, nil)
         XCTAssertEqual(childProg.label, "A label")
-        
     }
     
     func testLabel_NoChildren() {
-        
         let prog = LabelProgress()
         
         XCTAssertNil(prog.label)
@@ -85,11 +75,9 @@ final class LabelProgress_Tests: XCTestCase {
         XCTAssertNil(prog.label)
         XCTAssertNil(prog.combinedLabel)
         XCTAssertNil(prog.deepLabel)
-        
     }
     
     func testLabelNil_ChildHasLabelBeforeAddingToParent() {
-        
         let main = LabelProgress()
         
         XCTAssertNil(main.label)
@@ -114,11 +102,9 @@ final class LabelProgress_Tests: XCTestCase {
         XCTAssertEqual(main.label, "Main")
         XCTAssertEqual(main.combinedLabel, "Main")
         XCTAssertEqual(main.deepLabel, "Main")
-        
     }
     
     func testLabelNil_ChildNilButSetChildLabelAfterAddingToParent() {
-        
         let main = LabelProgress()
         
         XCTAssertNil(main.label)
@@ -146,11 +132,9 @@ final class LabelProgress_Tests: XCTestCase {
         XCTAssertEqual(main.label, "Main")
         XCTAssertEqual(main.combinedLabel, "Main")
         XCTAssertEqual(main.deepLabel, "Main")
-        
     }
     
     func testLabelNil_MultipleChildren() {
-        
         let main = LabelProgress()
         
         XCTAssertNil(main.label)
@@ -183,11 +167,9 @@ final class LabelProgress_Tests: XCTestCase {
         XCTAssertEqual(main.label, "Main")
         XCTAssertEqual(main.combinedLabel, "Main - Child1, Child2")
         XCTAssertEqual(main.deepLabel, "Main - Child1, Child2")
-        
     }
     
     func testLabelNil_NestedChildren() {
-        
         let main = LabelProgress()
         
         // main: initial state
@@ -294,9 +276,7 @@ final class LabelProgress_Tests: XCTestCase {
         XCTAssertEqual(ch3.deepLabel,      "C3 - C4")
         XCTAssertEqual(ch4.combinedLabel,  "C4")
         XCTAssertEqual(ch4.deepLabel,      "C4")
-        
     }
-    
 }
 
 #endif

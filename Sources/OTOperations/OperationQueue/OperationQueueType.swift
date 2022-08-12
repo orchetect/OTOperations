@@ -8,7 +8,6 @@
 import Foundation
 
 public enum OperationQueueType {
-    
     /// Serial (one operation at a time), FIFO (first-in-first-out).
     case serialFIFO
     
@@ -19,7 +18,6 @@ public enum OperationQueueType {
     /// Concurrent operations.
     /// Specify the number of max concurrent operations.
     case concurrent(max: Int)
-    
 }
 
 #endif

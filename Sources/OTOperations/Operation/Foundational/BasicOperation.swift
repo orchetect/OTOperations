@@ -42,7 +42,6 @@ import OTAtomics
 ///
 /// - important: This object is designed to be subclassed. See the Foundation documentation for `Operation` regarding overriding `start()` and be sure to follow the guidelines in these inline docs regarding `BasicOperation` specifically.
 open class BasicOperation: Operation, ProgressReporting {
-    
     // MARK: - Progress
     
     /// Progress object representing progress of the operation.
@@ -50,9 +49,7 @@ open class BasicOperation: Operation, ProgressReporting {
    
     /// Return `.progress` typed as `LabelProgress` in order to get or set label information.
     public final var labelProgress: LabelProgress {
-        
         progress as! LabelProgress
-        
     }
     
     /// Progress weight when the operation is added to a `BasicOperationQueue` or one of its subclasses.
@@ -61,35 +58,37 @@ open class BasicOperation: Operation, ProgressReporting {
     // MARK: - KVO
     
     // adding KVO compliance
-    @objc dynamic
-    public final override var isExecuting: Bool { _isExecuting }
+    @objc override public final dynamic
+    var isExecuting: Bool { _isExecuting }
     @OTAtomicsThreadSafe private var _isExecuting = false {
         willSet { willChangeValue(for: \.isExecuting) }
         didSet { didChangeValue(for: \.isExecuting) }
     }
     
     // adding KVO compliance
-    @objc dynamic
-    public final override var isFinished: Bool { _isFinished }
+    @objc override public final dynamic
+    var isFinished: Bool { _isFinished }
     @OTAtomicsThreadSafe private var _isFinished = false {
         willSet { willChangeValue(for: \.isFinished) }
         didSet { didChangeValue(for: \.isFinished) }
     }
     
     // adding KVO compliance
-    @objc dynamic
-    public final override var qualityOfService: QualityOfService {
+    @objc override public final dynamic
+    var qualityOfService: QualityOfService {
         get { _qualityOfService }
         set { _qualityOfService = newValue }
     }
+
     private var _qualityOfService: QualityOfService = .default {
         willSet { willChangeValue(for: \.qualityOfService) }
         didSet { didChangeValue(for: \.qualityOfService) }
     }
     
-    public init(label: String? = nil,
-                weight: BasicOperationQueue.ProgressWeight = .default()) {
-        
+    public init(
+        label: String? = nil,
+        weight: BasicOperationQueue.ProgressWeight = .default()
+    ) {
         progressWeight = weight
         super.init()
         
@@ -105,12 +104,12 @@ open class BasicOperation: Operation, ProgressReporting {
     
     // MARK: - Method Overrides
     
-    public final override func start() {
+    override public final func start() {
         if isCancelled { completeOperation(dueToCancellation: true) }
         super.start()
     }
     
-    public final override func cancel() {
+    override public final func cancel() {
         super.cancel()
         progress.cancel()
     }
@@ -119,7 +118,6 @@ open class BasicOperation: Operation, ProgressReporting {
     
     /// Returns true if operation should begin.
     public final func mainShouldStart() -> Bool {
-        
         guard !isCancelled else {
             completeOperation(dueToCancellation: true)
             return false
@@ -128,13 +126,11 @@ open class BasicOperation: Operation, ProgressReporting {
         guard !isExecuting else { return false }
         _isExecuting = true
         return true
-        
     }
     
     /// Call this once all execution is complete in the operation.
     /// If returning early from the operation due to `isCancelled` being true, call this with the `dueToCancellation` flag set to `true` to update this operation's progress as cancelled.
     public final func completeOperation(dueToCancellation: Bool = false) {
-        
         if dueToCancellation {
             progress.cancel()
         }
@@ -145,28 +141,22 @@ open class BasicOperation: Operation, ProgressReporting {
         
         _isExecuting = false
         _isFinished = true
-        
     }
     
     /// Checks if `isCancelled` is true, and calls `completedOperation()` if so.
     /// Returns `isCancelled`.
     public final func mainShouldAbort() -> Bool {
-        
         if isCancelled {
             completeOperation(dueToCancellation: true)
         }
         return isCancelled
-        
     }
     
     deinit {
-        
         // progress object MUST ALWAYS set completed == total, even if cancelled
         // or it will not be released from its parent progress
         progress.completedUnitCount = progress.totalUnitCount
-        
     }
-    
 }
 
 #endif

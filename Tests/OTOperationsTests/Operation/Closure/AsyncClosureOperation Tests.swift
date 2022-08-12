@@ -10,13 +10,11 @@ import XCTestUtils
 import OTOperations
 
 final class AsyncClosureOperation_Tests: XCTestCase {
-    
     override func setUp() { super.setUp() }
     override func tearDown() { super.tearDown() }
     
     /// Test as a standalone operation. Run it.
     func testOpRun() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         
         let completionBlockExp = expectation(description: "Completion Block Called")
@@ -42,12 +40,10 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test as a standalone operation. Do not run it.
     func testOpNotRun() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         mainBlockExp.isInverted = true
         
@@ -74,12 +70,10 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 0.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test as a standalone operation. Run it. Cancel before it finishes.
     func testOpRun_Cancel() {
-        
         let mainBlockExp = expectation(description: "Main Block Called")
         
         // the operation's main block does finish eventually but won't finish in time for our timeout because there's no opportunity to return early from cancelling the operation
@@ -117,13 +111,11 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertTrue(op.progress.isCancelled)
         XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
-        
     }
     
     /// Test in the context of an OperationQueue. Run is implicit.
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testQueue() {
-        
         let opQ = OperationQueue()
         
         let mainBlockExp = expectation(description: "Main Block Called")
@@ -160,13 +152,11 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isCancelled)
         XCTAssertEqual(opQ.progress.fractionCompleted, 1.0)
         XCTAssertFalse(opQ.progress.isIndeterminate)
-        
     }
     
     /// Test in the context of an OperationQueue. Run is implicit. Cancel before it finishes.
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testQueue_Cancel() {
-
         let opQ = OperationQueue()
 
         let mainBlockExp = expectation(description: "Main Block Called")
@@ -214,7 +204,10 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertEqual(op.progress.fractionCompleted, 1.0)
         XCTAssertFalse(op.progress.isIndeterminate)
         // progress - queue
-        XCTAssertTrue(opQ.progress.isFinished) // even if the async op is still running, this will be true now
+        XCTAssertTrue(
+            opQ.progress
+                .isFinished
+        ) // even if the async op is still running, this will be true now
         XCTAssertFalse(opQ.progress.isCancelled)
         XCTAssertEqual(opQ.progress.fractionCompleted, 1.0)
         XCTAssertFalse(opQ.progress.isIndeterminate)
@@ -237,9 +230,7 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isCancelled)
         XCTAssertEqual(opQ.progress.fractionCompleted, 1.0)
         XCTAssertFalse(opQ.progress.isIndeterminate)
-        
     }
-    
 }
 
 #endif
