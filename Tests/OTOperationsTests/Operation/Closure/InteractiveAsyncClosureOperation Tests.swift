@@ -1,6 +1,7 @@
 //
 //  InteractiveAsyncClosureOperation Tests.swift
 //  OTOperations • https://github.com/orchetect/OTOperations
+//  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
 #if shouldTestCurrentPlatform
