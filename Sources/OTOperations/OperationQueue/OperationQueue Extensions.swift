@@ -9,7 +9,8 @@
 import Foundation
 
 extension OperationQueue {
-    /// Blocks the current thread until all the receiver’s queued and executing operations finish executing. Same as calling `waitUntilAllOperationsAreFinished()` but offers a timeout duration.
+    /// Blocks the current thread until all the receiver’s queued and executing operations finish
+    /// executing. Same as calling `waitUntilAllOperationsAreFinished()` but offers a timeout duration.
     @discardableResult
     public func waitUntilAllOperationsAreFinished(
         timeout: TimeInterval

@@ -15,6 +15,7 @@ public enum OperationQueueStatus: Equatable, Hashable {
     case idle
     
     /// Operation queue is executing one or more operations.
+    /// 
     /// - Parameters:
     ///   - fractionCompleted: progress between 0.0...1.0
     ///   - label: nested operation labels
