@@ -13,8 +13,17 @@ extension OperationQueue {
     /// executing. Same as calling `waitUntilAllOperationsAreFinished()` but offers a timeout duration.
     @discardableResult
     public func waitUntilAllOperationsAreFinished(
-        timeout: TimeInterval
+        timeout: TimeInterval? = nil
     ) -> DispatchTimeoutResult {
+        // no timeout
+        
+        guard let timeout = timeout else {
+            self.waitUntilAllOperationsAreFinished()
+            return .success
+        }
+        
+        // with timeout
+        
         let g = DispatchGroup()
         g.enter()
         
