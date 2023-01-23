@@ -97,7 +97,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
                             usleep(10000 * UInt32.random(in: 1 ... 10))
                             if operation.mainShouldAbort() { return }
                             usleep(10000 * UInt32.random(in: 1 ... 10))
-                            atomicValue.mutate { $0 += 1 }
+                            atomicValue.withValue { $0 += 1 }
                             usleep(10000 * UInt32.random(in: 1 ... 10))
                             operation.progress.completedUnitCount = 0
                             operation.completeOperation()
@@ -107,7 +107,7 @@ final class BasicOperationQueue_Tests: XCTestCase {
                         usleep(10000 * UInt32.random(in: 1 ... 10))
                         if operation.mainShouldAbort() { return }
                         usleep(10000 * UInt32.random(in: 1 ... 10))
-                        atomicValue.mutate { $0 += 1 }
+                        atomicValue.withValue { $0 += 1 }
                         usleep(10000 * UInt32.random(in: 1 ... 10))
                         operation.progress.completedUnitCount = 0
                         operation.completeOperation()

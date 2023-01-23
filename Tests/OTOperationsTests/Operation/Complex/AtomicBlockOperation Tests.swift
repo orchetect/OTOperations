@@ -36,14 +36,14 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         let dataVerificationExp = expectation(description: "Data Verification")
         
         for val in 1 ... 100 {
-            op.addOperation { $0.mutate { $0.append(val) } }
+            op.addOperation { $0.withValue { $0.append(val) } }
         }
         
         op.setCompletionBlock { v in
             completionBlockExp.fulfill()
             
             // check that all operations executed and they are in serial FIFO order
-            v.mutate { value in
+            v.withValue { value in
                 XCTAssertEqual(value, Array(1 ... 100))
                 dataVerificationExp.fulfill()
             }
@@ -71,13 +71,13 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         let dataVerificationExp = expectation(description: "Data Verification")
         
         for val in 1 ... 100 {
-            op.addOperation { $0.mutate { $0.append(val) } }
+            op.addOperation { $0.withValue { $0.append(val) } }
         }
         
         op.setCompletionBlock { v in
             completionBlockExp.fulfill()
             
-            v.mutate { value in
+            v.withValue { value in
                 // check that all operations executed
                 XCTAssertEqual(value.count, 100)
                 
@@ -115,13 +115,13 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         dataVerificationExp.isInverted = true
         
         for val in 1 ... 100 {
-            op.addOperation { $0.mutate { $0.append(val) } }
+            op.addOperation { $0.withValue { $0.append(val) } }
         }
         
         op.setCompletionBlock { v in
             completionBlockExp.fulfill()
             
-            v.mutate { value in
+            v.withValue { value in
                 // check that all operations executed
                 XCTAssertEqual(value.count, 100)
                 
@@ -154,13 +154,13 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         let atomicBlockCompletedExp = expectation(description: "AtomicBlockOperation Completed")
         
         for val in 1 ... 100 {
-            op.addOperation { $0.mutate { $0.append(val) } }
+            op.addOperation { $0.withValue { $0.append(val) } }
         }
         
         op.setCompletionBlock { v in
             completionBlockExp.fulfill()
             
-            v.mutate { value in
+            v.withValue { value in
                 // check that all operations executed
                 XCTAssertEqual(value.count, 100)
                 
@@ -212,14 +212,14 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                 XCTAssertEqual(Thread.current.qualityOfService, .userInitiated)
                 
                 // add value to array
-                v.mutate { $0.append(val) }
+                v.withValue { $0.append(val) }
             }
         }
         
         op.setCompletionBlock { v in
             completionBlockExp.fulfill()
             
-            v.mutate { value in
+            v.withValue { value in
                 // check that all operations executed
                 XCTAssertEqual(value.count, 100)
                 
@@ -256,7 +256,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         for val in 1 ... 100 { // will take 1 second to complete
             op.addOperation { v in
                 usleep(10000)
-                v.mutate { $0.append(val) }
+                v.withValue { $0.append(val) }
             }
         }
         
@@ -295,7 +295,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                     initialMutableValue: [Int]()
                 )
                 subOp.addOperation { v in
-                    v.mutate { value in
+                    v.withValue { value in
                         for valueNum in 1 ... 200 {
                             value.append(valueNum)
                         }
@@ -304,14 +304,14 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                 
                 subOp.start()
                 
-                v.mutate { value in
+                v.withValue { value in
                     value[keyNum] = subOp.value
                 }
             }
         }
         
         mainOp.setCompletionBlock { v in
-            v.mutate { value in
+            v.withValue { value in
                 mainVal = value
             }
             
@@ -352,7 +352,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
                 let ref = subOp.addInteractiveOperation { op, v in
                     if op.mainShouldAbort() { return }
                     usleep(200_000)
-                    v.mutate { value in
+                    v.withValue { value in
                         value.append(valueNum)
                     }
                 }
@@ -360,11 +360,8 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             }
             
             subOp.addOperation { [weak mainOp] v in
-                var getVal: [Int] = []
-                v.mutate { value in
-                    getVal = value
-                }
-                mainOp?.mutateValue { mainValue in
+                var getVal: [Int] = v.withValue { $0 }
+                mainOp?.withValue { mainValue in
                     mainValue[keyNum] = getVal
                 }
             }
@@ -373,7 +370,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         }
         
         mainOp.setCompletionBlock { v in
-            v.mutate { value in
+            v.withValue { value in
                 mainVal = value
             }
             

@@ -23,7 +23,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             )
             
             for val in 1 ... 100 {
-                opQ.addOperation { $0.mutate { $0.append(val) } }
+                opQ.addOperation { $0.withValue { $0.append(val) } }
             }
             
             wait(for: opQ.status, equals: .idle, timeout: 1.0)
@@ -54,7 +54,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             )
             
             for val in 1 ... 100 {
-                opQ.addOperation { $0.mutate { $0.append(val) } }
+                opQ.addOperation { $0.withValue { $0.append(val) } }
             }
             
             wait(for: opQ.status, equals: .idle, timeout: 0.5)
@@ -89,7 +89,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             XCTAssertEqual(opQ.status, .paused)
             
             for val in 1 ... 100 {
-                opQ.addOperation { $0.mutate { $0.append(val) } }
+                opQ.addOperation { $0.withValue { $0.append(val) } }
             }
             
             XCTAssertEqual(opQ.status, .paused)
@@ -160,7 +160,7 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             )
             
             for val in 1 ... 100 {
-                opQ.addOperation { $0.mutate { $0.append(val) } }
+                opQ.addOperation { $0.withValue { $0.append(val) } }
             }
             
             wait(for: opQ.status, equals: .idle, timeout: 1.0)
@@ -196,12 +196,12 @@ final class AtomicOperationQueue_Tests: XCTestCase {
             
             // first generate operation objects
             for val in 1 ... 50 {
-                let op = opQ.createOperation { $0.mutate { $0.append(val) } }
+                let op = opQ.createOperation { $0.withValue { $0.append(val) } }
                 ops.append(op)
             }
             for val in 51 ... 100 {
                 let op = opQ.createInteractiveOperation { _, v in
-                    v.mutate { $0.append(val) }
+                    v.withValue { $0.append(val) }
                 }
                 ops.append(op)
             }

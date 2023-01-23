@@ -76,8 +76,8 @@ open class AtomicBlockOperation<T>: BasicOperation {
     }
     
     /// Mutate the shared atomic variable in a closure.
-    public final func mutateValue(_ block: (inout T) -> Void) {
-        block(&operationQueue.sharedMutableValue)
+    public final func withValue<U>(_ block: (_ value: inout T) throws -> U) rethrows -> U {
+        try block(&operationQueue.sharedMutableValue)
     }
     
     // MARK: - Status
