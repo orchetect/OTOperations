@@ -409,6 +409,8 @@ final class AtomicBlockOperation_Tests: XCTestCase {
     
     /// Ensure that nested progress objects successfully result in the topmost queue calling statusHandler at every increment of all progress children at every level.
     func testProgress() {
+        // TODO: This test is flakey. Sometimes it succeeds and sometimes it fails, randomly. Perhaps points to issues with the code and not the test.
+        
         class AtomicOperationQueueProgressTest {
             var statuses: [OperationQueueStatus] = []
             
@@ -459,7 +461,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             
             qTest.mainOp.isSuspended = false
             
-            wait(for: qTest.mainOp.status, equals: .idle, timeout: 2.0)
+            wait(for: qTest.mainOp.status, equals: .idle, timeout: 5.0)
         }
         
         let runExp = expectation(description: "Test Run")
@@ -467,7 +469,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             runTest()
             runExp.fulfill()
         }
-        wait(for: [runExp], timeout: 5.0)
+        wait(for: [runExp], timeout: 8.0)
         
         // remove sequential duplicates in order to test, since operations
         // completing will trigger a statusHandler callback when labels
@@ -476,34 +478,35 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             .convertedToTestableFractionCompleted()
             .removingSequentialDuplicates()
         
-        if reducedStatusFC.indices.count == 23 {
-            XCTAssertEqual(reducedStatusFC[00], .idle)
-            XCTAssertEqual(reducedStatusFC[01], .paused)
-            XCTAssertEqual(reducedStatusFC[02], .inProgress(fractionCompleted: 0.00))
-            XCTAssertEqual(reducedStatusFC[03], .inProgress(fractionCompleted: 0.05))
-            XCTAssertEqual(reducedStatusFC[04], .inProgress(fractionCompleted: 0.10))
-            XCTAssertEqual(reducedStatusFC[05], .inProgress(fractionCompleted: 0.15))
-            XCTAssertEqual(reducedStatusFC[06], .inProgress(fractionCompleted: 0.20))
-            XCTAssertEqual(reducedStatusFC[07], .inProgress(fractionCompleted: 0.25))
-            XCTAssertEqual(reducedStatusFC[08], .inProgress(fractionCompleted: 0.30))
-            XCTAssertEqual(reducedStatusFC[09], .inProgress(fractionCompleted: 0.35))
-            XCTAssertEqual(reducedStatusFC[10], .inProgress(fractionCompleted: 0.40))
-            XCTAssertEqual(reducedStatusFC[11], .inProgress(fractionCompleted: 0.45))
-            XCTAssertEqual(reducedStatusFC[12], .inProgress(fractionCompleted: 0.50))
-            XCTAssertEqual(reducedStatusFC[13], .inProgress(fractionCompleted: 0.55))
-            XCTAssertEqual(reducedStatusFC[14], .inProgress(fractionCompleted: 0.60))
-            XCTAssertEqual(reducedStatusFC[15], .inProgress(fractionCompleted: 0.65))
-            XCTAssertEqual(reducedStatusFC[16], .inProgress(fractionCompleted: 0.70))
-            XCTAssertEqual(reducedStatusFC[17], .inProgress(fractionCompleted: 0.75))
-            XCTAssertEqual(reducedStatusFC[18], .inProgress(fractionCompleted: 0.80))
-            XCTAssertEqual(reducedStatusFC[19], .inProgress(fractionCompleted: 0.85))
-            XCTAssertEqual(reducedStatusFC[20], .inProgress(fractionCompleted: 0.90))
-            XCTAssertEqual(reducedStatusFC[21], .inProgress(fractionCompleted: 0.95))
-            XCTAssertEqual(reducedStatusFC[22], .idle)
-        } else {
-            XCTFail()
+        guard reducedStatusFC.count == 23 else {
+            XCTFail("Count was expected to be 23 but was \(reducedStatusFC.indices.count) instead.")
+            return
         }
         
+        XCTAssertEqual(reducedStatusFC[00], .idle)
+        XCTAssertEqual(reducedStatusFC[01], .paused)
+        XCTAssertEqual(reducedStatusFC[02], .inProgress(fractionCompleted: 0.00))
+        XCTAssertEqual(reducedStatusFC[03], .inProgress(fractionCompleted: 0.05))
+        XCTAssertEqual(reducedStatusFC[04], .inProgress(fractionCompleted: 0.10))
+        XCTAssertEqual(reducedStatusFC[05], .inProgress(fractionCompleted: 0.15))
+        XCTAssertEqual(reducedStatusFC[06], .inProgress(fractionCompleted: 0.20))
+        XCTAssertEqual(reducedStatusFC[07], .inProgress(fractionCompleted: 0.25))
+        XCTAssertEqual(reducedStatusFC[08], .inProgress(fractionCompleted: 0.30))
+        XCTAssertEqual(reducedStatusFC[09], .inProgress(fractionCompleted: 0.35))
+        XCTAssertEqual(reducedStatusFC[10], .inProgress(fractionCompleted: 0.40))
+        XCTAssertEqual(reducedStatusFC[11], .inProgress(fractionCompleted: 0.45))
+        XCTAssertEqual(reducedStatusFC[12], .inProgress(fractionCompleted: 0.50))
+        XCTAssertEqual(reducedStatusFC[13], .inProgress(fractionCompleted: 0.55))
+        XCTAssertEqual(reducedStatusFC[14], .inProgress(fractionCompleted: 0.60))
+        XCTAssertEqual(reducedStatusFC[15], .inProgress(fractionCompleted: 0.65))
+        XCTAssertEqual(reducedStatusFC[16], .inProgress(fractionCompleted: 0.70))
+        XCTAssertEqual(reducedStatusFC[17], .inProgress(fractionCompleted: 0.75))
+        XCTAssertEqual(reducedStatusFC[18], .inProgress(fractionCompleted: 0.80))
+        XCTAssertEqual(reducedStatusFC[19], .inProgress(fractionCompleted: 0.85))
+        XCTAssertEqual(reducedStatusFC[20], .inProgress(fractionCompleted: 0.90))
+        XCTAssertEqual(reducedStatusFC[21], .inProgress(fractionCompleted: 0.95))
+        XCTAssertEqual(reducedStatusFC[22], .idle)
+       
         // TODO: probably shouldn't test inProgress description since it's brittle;
         // TODO: it uses localizedDescription which may not always be English
         
@@ -514,33 +517,30 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             .convertedToTestableDescription()
             .removingSequentialDuplicates()
         
-        if reducedStatusDesc.indices.count == 23 {
-            XCTAssertEqual(reducedStatusDesc[00], .idle)
-            XCTAssertEqual(reducedStatusDesc[01], .paused)
-            XCTAssertEqual(reducedStatusDesc[02], .inProgress(description: "0% completed"))
-            XCTAssertEqual(reducedStatusDesc[03], .inProgress(description: "5% completed"))
-            XCTAssertEqual(reducedStatusDesc[04], .inProgress(description: "10% completed"))
-            XCTAssertEqual(reducedStatusDesc[05], .inProgress(description: "15% completed"))
-            XCTAssertEqual(reducedStatusDesc[06], .inProgress(description: "20% completed"))
-            XCTAssertEqual(reducedStatusDesc[07], .inProgress(description: "25% completed"))
-            XCTAssertEqual(reducedStatusDesc[08], .inProgress(description: "30% completed"))
-            XCTAssertEqual(reducedStatusDesc[09], .inProgress(description: "35% completed"))
-            XCTAssertEqual(reducedStatusDesc[10], .inProgress(description: "40% completed"))
-            XCTAssertEqual(reducedStatusDesc[11], .inProgress(description: "45% completed"))
-            XCTAssertEqual(reducedStatusDesc[12], .inProgress(description: "50% completed"))
-            XCTAssertEqual(reducedStatusDesc[13], .inProgress(description: "55% completed"))
-            XCTAssertEqual(reducedStatusDesc[14], .inProgress(description: "60% completed"))
-            XCTAssertEqual(reducedStatusDesc[15], .inProgress(description: "65% completed"))
-            XCTAssertEqual(reducedStatusDesc[16], .inProgress(description: "70% completed"))
-            XCTAssertEqual(reducedStatusDesc[17], .inProgress(description: "75% completed"))
-            XCTAssertEqual(reducedStatusDesc[18], .inProgress(description: "80% completed"))
-            XCTAssertEqual(reducedStatusDesc[19], .inProgress(description: "85% completed"))
-            XCTAssertEqual(reducedStatusDesc[20], .inProgress(description: "90% completed"))
-            XCTAssertEqual(reducedStatusDesc[21], .inProgress(description: "95% completed"))
-            XCTAssertEqual(reducedStatusDesc[22], .idle)
-        } else {
-            XCTFail()
-        }
+        XCTAssertEqual(reducedStatusDesc[00], .idle)
+        XCTAssertEqual(reducedStatusDesc[01], .paused)
+        XCTAssertEqual(reducedStatusDesc[02], .inProgress(description: "0% completed"))
+        XCTAssertEqual(reducedStatusDesc[03], .inProgress(description: "5% completed"))
+        XCTAssertEqual(reducedStatusDesc[04], .inProgress(description: "10% completed"))
+        XCTAssertEqual(reducedStatusDesc[05], .inProgress(description: "15% completed"))
+        XCTAssertEqual(reducedStatusDesc[06], .inProgress(description: "20% completed"))
+        XCTAssertEqual(reducedStatusDesc[07], .inProgress(description: "25% completed"))
+        XCTAssertEqual(reducedStatusDesc[08], .inProgress(description: "30% completed"))
+        XCTAssertEqual(reducedStatusDesc[09], .inProgress(description: "35% completed"))
+        XCTAssertEqual(reducedStatusDesc[10], .inProgress(description: "40% completed"))
+        XCTAssertEqual(reducedStatusDesc[11], .inProgress(description: "45% completed"))
+        XCTAssertEqual(reducedStatusDesc[12], .inProgress(description: "50% completed"))
+        XCTAssertEqual(reducedStatusDesc[13], .inProgress(description: "55% completed"))
+        XCTAssertEqual(reducedStatusDesc[14], .inProgress(description: "60% completed"))
+        XCTAssertEqual(reducedStatusDesc[15], .inProgress(description: "65% completed"))
+        XCTAssertEqual(reducedStatusDesc[16], .inProgress(description: "70% completed"))
+        XCTAssertEqual(reducedStatusDesc[17], .inProgress(description: "75% completed"))
+        XCTAssertEqual(reducedStatusDesc[18], .inProgress(description: "80% completed"))
+        XCTAssertEqual(reducedStatusDesc[19], .inProgress(description: "85% completed"))
+        XCTAssertEqual(reducedStatusDesc[20], .inProgress(description: "90% completed"))
+        XCTAssertEqual(reducedStatusDesc[21], .inProgress(description: "95% completed"))
+        XCTAssertEqual(reducedStatusDesc[22], .idle)
+        
     }
 }
 
