@@ -21,6 +21,7 @@ extension AtomicOperationQueue {
         /// 
         /// - Warning: Perform as little logic as possible and only use this closure to get or set the variable.
         /// Failure to do so may result in deadlocks in complex multi-threaded applications.
+        @discardableResult
         public func withValue<U>(_ block: (_ value: inout T) throws -> U) rethrows -> U {
             try block(&operationQueue.sharedMutableValue)
         }

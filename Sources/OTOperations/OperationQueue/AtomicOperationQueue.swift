@@ -217,6 +217,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue {
     }
     
     /// Provides a closure to mutate the shared atomic variable and optionally return a value.
+    @discardableResult
     public func withValue<U>(_ block: (_ value: inout T) throws -> U) rethrows -> U {
         try block(&sharedMutableValue)
     }
