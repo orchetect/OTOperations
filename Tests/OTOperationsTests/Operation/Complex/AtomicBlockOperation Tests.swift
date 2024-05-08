@@ -360,7 +360,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             }
             
             subOp.addOperation { [weak mainOp] v in
-                var getVal: [Int] = v.withValue { $0 }
+                let getVal: [Int] = v.withValue { $0 }
                 mainOp?.withValue { mainValue in
                     mainValue[keyNum] = getVal
                 }
