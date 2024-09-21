@@ -17,7 +17,7 @@ final class BasicOperation_Tests: XCTestCase {
     
     /// `BasicOperation` is designed to be subclassed.
     /// This is a simple subclass to test.
-    private class TestBasicOperation: BasicOperation {
+    private class TestBasicOperation: BasicOperation, @unchecked Sendable {
         override func main() {
             print("Starting main()")
             guard mainShouldStart() else { return }
@@ -34,7 +34,7 @@ final class BasicOperation_Tests: XCTestCase {
     
     /// `BasicOperation` is designed to be subclassed.
     /// This is a simple subclass to test.
-    private class TestDelayedMutatingBasicOperation: BasicOperation {
+    private class TestDelayedMutatingBasicOperation: BasicOperation, @unchecked Sendable {
         public var val: Int
         private var valChangeTo: Int
         

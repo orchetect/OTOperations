@@ -47,7 +47,7 @@ import Foundation
 /// - note: This object is designed to be subclassed. See the Foundation documentation for `Operation` regarding overriding `start()` and be sure to follow the guidelines in these inline docs regarding `BasicAsyncOperation` specifically.
 ///
 /// - note: Inherits from `BasicOperation`.
-open class BasicAsyncOperation: BasicOperation {
+open class BasicAsyncOperation: BasicOperation, @unchecked Sendable {
     override public final var isAsynchronous: Bool { true }
 }
 

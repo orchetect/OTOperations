@@ -13,7 +13,7 @@ import OTAtomics
 /// Concurrency type can be specified.
 ///
 /// - note: Inherits from `BasicOperationQueue`.
-open class AtomicOperationQueue<T>: BasicOperationQueue {
+open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable {
     /// The thread-safe shared mutable value that all operation blocks operate upon.
     @OTAtomicsThreadSafe public final var sharedMutableValue: T
     

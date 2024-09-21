@@ -39,7 +39,7 @@ import Foundation
 /// - important: This object is not intended to be subclassed. Rather, it is a simple convenience wrapper when a closure is needed to be wrapped in an `Operation` for when you require a reference to the operation which would not otherwise be available if `.addOperation{}` was called directly on an `OperationQueue`.
 ///
 /// - note: Inherits from `BasicOperation`.
-public final class ClosureOperation: BasicOperation {
+public final class ClosureOperation: BasicOperation, @unchecked Sendable {
     override public final var isAsynchronous: Bool { false }
     
     public final var mainBlock: () -> Void

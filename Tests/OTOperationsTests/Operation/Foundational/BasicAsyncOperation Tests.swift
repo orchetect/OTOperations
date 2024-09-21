@@ -17,7 +17,7 @@ final class BasicAsyncOperation_Tests: XCTestCase {
     
     /// `BasicAsyncOperation` is designed to be subclassed.
     /// This is a simple subclass to test.
-    private class TestBasicAsyncOperation: BasicAsyncOperation {
+    private class TestBasicAsyncOperation: BasicAsyncOperation, @unchecked Sendable {
         override func main() {
             print("Starting main()")
             guard mainShouldStart() else { return }
@@ -38,7 +38,7 @@ final class BasicAsyncOperation_Tests: XCTestCase {
     
     /// `BasicAsyncOperation` is designed to be subclassed.
     /// This is a simple subclass to test.
-    private class TestLongRunningBasicAsyncOperation: BasicAsyncOperation {
+    private class TestLongRunningBasicAsyncOperation: BasicAsyncOperation, @unchecked Sendable {
         private let totalOpCount = 100
         
         init() {

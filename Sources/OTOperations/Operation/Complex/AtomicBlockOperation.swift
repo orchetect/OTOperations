@@ -50,7 +50,7 @@ import Foundation
 /// - important: In most use cases, this object does not need to be subclassed.
 ///
 /// - note: Inherits from both `BasicAsyncOperation` and `BasicOperation`.
-open class AtomicBlockOperation<T>: BasicOperation {
+open class AtomicBlockOperation<T>: BasicOperation, @unchecked Sendable {
     // MARK: - Operations
     
     private var operationQueueType: OperationQueueType {

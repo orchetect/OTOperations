@@ -10,7 +10,9 @@ import Foundation
 import OTAtomics
 
 /// An `OperationQueue` subclass with useful additions.
-open class BasicOperationQueue: OperationQueue {
+open class BasicOperationQueue: OperationQueue,
+                                @unchecked Sendable // Sendable should be ok since OperationQueue and Operation are Sendable
+{
     /// Any time the queue completes all of its operations and returns to an empty queue, reset the progress object's total unit count to 0.
     public final var resetProgressWhenFinished: Bool
     

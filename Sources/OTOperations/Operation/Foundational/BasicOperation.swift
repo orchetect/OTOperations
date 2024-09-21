@@ -42,7 +42,10 @@ import OTAtomics
 ///     }
 ///
 /// - important: This object is designed to be subclassed. See the Foundation documentation for `Operation` regarding overriding `start()` and be sure to follow the guidelines in these inline docs regarding `BasicOperation` specifically.
-open class BasicOperation: Operation, ProgressReporting {
+open class BasicOperation: Operation,
+                           ProgressReporting,
+                           @unchecked Sendable // Sendable should be ok since both Operation and Progress are Sendable
+{
     // MARK: - Progress
     
     /// Progress object representing progress of the operation.

@@ -11,7 +11,7 @@ import CoreFoundation
 import OTAtomics
 
 /// A `Progress` subclass that supports a custom label and automatically aggregates labels from child progress objects.
-public class LabelProgress: Progress {
+public class LabelProgress: Progress, @unchecked Sendable {
     // MARK: - Refs
     
     private var labelProgressParent: LabelProgress? {
