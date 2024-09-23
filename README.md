@@ -36,10 +36,10 @@ Scalable, thread-safe, and automatically fully progress-reporting for nested chi
    ],
    ```
    
-2. `@_implementationOnly` prevents the methods and properties in `OTOperations` from being exported to the consumer of your SPM package.
+2. Using `internal import` prevents the methods and properties in `OTOperations` from being exported to the consumer of your SPM package.
 
    ```swift
-   @_implementationOnly import OTOperations
+   internal import OTOperations
    ```
 
 ## Documentation
