@@ -1,6 +1,6 @@
 # OTOperations
 
-[![CI Build Status](https://github.com/orchetect/OTOperations/actions/workflows/build.yml/badge.svg)](https://github.com/orchetect/OTOperations/actions/workflows/build.yml) [![Platforms - macOS 10.11+ | iOS 9+ | tvOS 9+ | watchOS 2+ | visionOS 1+](https://img.shields.io/badge/platforms-macOS%2010.11+%20|%20iOS%209+%20|%20tvOS%209+%20|%20watchOS%202+%20|%20visionOS%201+-lightgrey.svg?style=flat)](https://developer.apple.com/swift) ![Swift 5.3-6.0](https://img.shields.io/badge/Swift-5.3–6.0-orange.svg?style=flat) [![Xcode 12.0-16](https://img.shields.io/badge/Xcode-12.0–16-blue.svg?style=flat)](https://developer.apple.com/swift) [![License: MIT](http://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/orchetect/OTOperations/blob/main/LICENSE)
+[![CI Build Status](https://github.com/orchetect/OTOperations/actions/workflows/build.yml/badge.svg)](https://github.com/orchetect/OTOperations/actions/workflows/build.yml) [![Platforms - macOS 10.15+ | iOS 13+ | tvOS 13+ | watchOS 6+ | visionOS 1+](https://img.shields.io/badge/platforms-macOS%2010.15+%20|%20iOS%2013+%20|%20tvOS%2013+%20|%20watchOS%206+%20|%20visionOS%201+-lightgrey.svg?style=flat)](https://developer.apple.com/swift) ![Swift 5.3-6.0](https://img.shields.io/badge/Swift-5.3–6.0-orange.svg?style=flat) [![Xcode 15-16](https://img.shields.io/badge/Xcode-15–16-blue.svg?style=flat)](https://developer.apple.com/swift) [![License: MIT](http://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/orchetect/OTOperations/blob/main/LICENSE)
 
 Useful `NSOperation` (`Operation`) and `NSOperationQueue` (`OperationQueue`) subclasses for Swift.
 
@@ -32,7 +32,7 @@ Scalable, thread-safe, and automatically fully progress-reporting for nested chi
 
    ```swift
    dependencies: [
-       .package(url: "https://github.com/orchetect/OTOperations", from: "1.0.0")
+       .package(url: "https://github.com/orchetect/OTOperations", from: "2.0.0")
    ],
    ```
    
