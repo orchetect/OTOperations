@@ -4,8 +4,6 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-#if shouldTestCurrentPlatform
-
 import XCTest
 import XCTestUtils
 import OTOperations
@@ -233,5 +231,3 @@ final class AsyncClosureOperation_Tests: XCTestCase {
         XCTAssertFalse(opQ.progress.isIndeterminate)
     }
 }
-
-#endif

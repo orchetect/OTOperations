@@ -4,8 +4,6 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-#if shouldTestCurrentPlatform
-
 import Foundation
 import OTOperations
 
@@ -92,5 +90,3 @@ extension Collection where Element == OperationQueueStatus {
         }
     }
 }
-
-#endif

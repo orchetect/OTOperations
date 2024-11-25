@@ -4,8 +4,6 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-#if shouldTestCurrentPlatform
-
 import XCTest
 import XCTestUtils
 @testable import OTOperations
@@ -262,5 +260,3 @@ final class AtomicOperationQueue_Tests: XCTestCase {
         runTest(resetWhenFinished: true)
     }
 }
-
-#endif

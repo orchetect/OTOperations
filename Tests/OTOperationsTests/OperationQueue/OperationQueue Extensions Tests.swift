@@ -4,8 +4,6 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-#if shouldTestCurrentPlatform
-
 import XCTest
 import OTOperations
 import OTAtomics
@@ -63,5 +61,3 @@ final class OperationQueueExtensions_TimedOut_Tests: XCTestCase {
         XCTAssertEqual(val, 0)
     }
 }
-
-#endif

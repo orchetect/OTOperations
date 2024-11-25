@@ -4,8 +4,6 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-#if shouldTestCurrentPlatform
-
 import XCTest
 import OTOperations
 
@@ -212,5 +210,3 @@ final class BasicOperation_Tests: XCTestCase {
         wait(for: [completionBlockExp], timeout: 2)
     }
 }
-
-#endif

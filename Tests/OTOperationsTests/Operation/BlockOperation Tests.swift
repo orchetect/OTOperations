@@ -4,8 +4,6 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-#if shouldTestCurrentPlatform
-
 import XCTest
 @testable import OTOperations
 import OTAtomics
@@ -44,5 +42,3 @@ final class BlockOperation_Tests: XCTestCase {
         wait(for: [completionBlockExp], timeout: 2)
     }
 }
-
-#endif

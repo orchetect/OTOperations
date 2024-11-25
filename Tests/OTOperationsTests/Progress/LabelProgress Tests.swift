@@ -4,8 +4,6 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-#if shouldTestCurrentPlatform
-
 import XCTest
 @testable import OTOperations
 
@@ -279,5 +277,3 @@ final class LabelProgress_Tests: XCTestCase {
         XCTAssertEqual(ch4.deepLabel,      "C4")
     }
 }
-
-#endif
