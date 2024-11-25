@@ -50,7 +50,7 @@ import Foundation
 /// - important: In most use cases, this object does not need to be subclassed.
 ///
 /// - note: Inherits from both `BasicAsyncOperation` and `BasicOperation`.
-open class AtomicBlockOperation<T>: BasicOperation, @unchecked Sendable {
+open class AtomicBlockOperation<T>: BasicOperation, @unchecked Sendable where T: Sendable {
     // MARK: - Operations
     
     private var operationQueueType: OperationQueueType {
@@ -246,7 +246,7 @@ extension AtomicBlockOperation {
         label: String? = nil,
         weight: BasicOperationQueue.ProgressWeight = .default(),
         dependencies: [Operation] = [],
-        _ block: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
+        _ block: @escaping @Sendable (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) -> ClosureOperation {
         operationQueue.addOperation(
             label: label,
@@ -264,7 +264,7 @@ extension AtomicBlockOperation {
         label: String? = nil,
         weight: BasicOperationQueue.ProgressWeight = .default(),
         dependencies: [Operation] = [],
-        _ block: @escaping (
+        _ block: @escaping @Sendable (
             _ operation: InteractiveClosureOperation,
             _ atomicValue: AtomicOperationQueue<T>.VariableAccess
         ) -> Void
@@ -297,7 +297,7 @@ extension AtomicBlockOperation {
     /// Invoked after all currently enqueued operations have finished. Operations you add after the barrier block don’t start until the block has completed.
     @available(macOS 10.15, iOS 13.0, tvOS 13, watchOS 6, *)
     public final func addBarrierBlock(
-        _ barrier: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
+        _ barrier: @escaping @Sendable (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) {
         operationQueue.addBarrierBlock(barrier)
     }
@@ -320,7 +320,7 @@ extension AtomicBlockOperation {
     
     /// Add a completion block that runs when the `AtomicBlockOperation` completes all its operations.
     public final func setCompletionBlock(
-        _ block: @escaping (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
+        _ block: @escaping @Sendable (_ atomicValue: AtomicOperationQueue<T>.VariableAccess) -> Void
     ) {
         completionBlock = { [weak self] in
             guard let self = self else { return }

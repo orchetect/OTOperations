@@ -157,7 +157,7 @@ open class BasicOperationQueue: OperationQueue,
     
     /// Add an operation block.
     override public final func addOperation(
-        _ block: @escaping () -> Void
+        _ block: @escaping @Sendable () -> Void
     ) {
         // wrap in an actual operation object so we can track it
         let op = ClosureOperation {

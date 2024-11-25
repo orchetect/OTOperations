@@ -30,6 +30,8 @@ public enum OperationQueueAccess {
         }
     }
 }
+
+extension OperationQueueAccess: Sendable { }
     
 extension OperationQueue {
     /// Provides a convenient interface for conditionally waiting for the operation queue to finish executing.

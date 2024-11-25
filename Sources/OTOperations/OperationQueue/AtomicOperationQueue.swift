@@ -13,7 +13,7 @@ import OTAtomics
 /// Concurrency type can be specified.
 ///
 /// - note: Inherits from `BasicOperationQueue`.
-open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable {
+open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable where T: Sendable {
     /// The thread-safe shared mutable value that all operation blocks operate upon.
     @OTAtomicsThreadSafe public final var sharedMutableValue: T
     
@@ -86,7 +86,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable {
         label: String? = nil,
         weight: ProgressWeight = .default(),
         dependencies: [Operation] = [],
-        _ block: @escaping (_ atomicValue: VariableAccess) -> Void
+        _ block: @escaping @Sendable (_ atomicValue: VariableAccess) -> Void
     ) -> ClosureOperation {
         let op = createOperation(
             label: label,
@@ -147,7 +147,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable {
         label: String? = nil,
         weight: ProgressWeight = .default(),
         dependencies: [Operation] = [],
-        _ block: @escaping (
+        _ block: @escaping @Sendable (
             _ operation: InteractiveClosureOperation,
             _ atomicValue: VariableAccess
         ) -> Void
@@ -167,7 +167,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable {
     /// Invoked after all currently enqueued operations have finished. Operations you add after the barrier block don’t start until the block has completed.
     @available(macOS 10.15, iOS 13.0, tvOS 13, watchOS 6, *)
     public final func addBarrierBlock(
-        _ barrier: @escaping (_ atomicValue: VariableAccess) -> Void
+        _ barrier: @escaping @Sendable (_ atomicValue: VariableAccess) -> Void
     ) {
         addBarrierBlock { [weak self] in
             guard let self = self else { return }
@@ -183,7 +183,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable {
     internal final func createOperation(
         label: String? = nil,
         weight: ProgressWeight = .default(),
-        _ block: @escaping (_ atomicValue: VariableAccess) -> Void
+        _ block: @escaping @Sendable (_ atomicValue: VariableAccess) -> Void
     ) -> ClosureOperation {
         ClosureOperation(
             label: label,
@@ -201,7 +201,7 @@ open class AtomicOperationQueue<T>: BasicOperationQueue, @unchecked Sendable {
     internal final func createInteractiveOperation(
         label: String? = nil,
         weight: ProgressWeight = .default(),
-        _ block: @escaping (
+        _ block: @escaping @Sendable (
             _ operation: InteractiveClosureOperation,
             _ atomicValue: VariableAccess
         ) -> Void

@@ -4,60 +4,58 @@
 //  © 2022 Steffan Andrews • Licensed under MIT License
 //
 
-import XCTest
+import Foundation
+import Testing
 import OTOperations
 import OTAtomics
+import XCTestUtils
 
-final class OperationQueueExtensions_Success_Tests: XCTestCase {
-    override func setUp() { super.setUp() }
-    override func tearDown() { super.tearDown() }
-    
-    @OTAtomicsThreadSafe fileprivate var val = 0
-    
-    func testWaitUntilAllOperationsAreFinished_Timeout_Success() {
+@Suite struct OperationQueueExtensions_Success_Tests {
+    @MainActor
+    @Test func testWaitUntilAllOperationsAreFinished_Timeout_Success() async throws {
         let opQ = OperationQueue()
         opQ.maxConcurrentOperationCount = 1 // serial
         opQ.isSuspended = true
         
-        val = 0
+        var val = 0
         
-        opQ.addOperation {
+        opQ.addOperation { 
             usleep(100_000)
-            self.val = 1
+            Task { @MainActor in val = 1 }
         }
         
         opQ.isSuspended = false
         let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: 0.5)
         
-        XCTAssertEqual(timeoutResult, .success)
-        XCTAssertEqual(opQ.operationCount, 0)
-        XCTAssertEqual(val, 1)
+        try await Task.sleep(nanoseconds: 500_000_000) // 0.5s
+        
+        #expect(timeoutResult == .success)
+        #expect(opQ.operationCount == 0)
+        #expect(val == 1)
     }
 }
 
-final class OperationQueueExtensions_TimedOut_Tests: XCTestCase {
-    override func setUp() { super.setUp() }
-    override func tearDown() { super.tearDown() }
-    
-    @OTAtomicsThreadSafe fileprivate var val = 0
-    
-    func testWaitUntilAllOperationsAreFinished_Timeout_TimedOut() {
+@Suite struct OperationQueueExtensions_TimedOut_Tests {
+    @MainActor
+    @Test func testWaitUntilAllOperationsAreFinished_Timeout_TimedOut() async throws {
         let opQ = OperationQueue()
         opQ.maxConcurrentOperationCount = 1 // serial
         opQ.isSuspended = true
         
-        val = 0
+        var val = 0
         
         opQ.addOperation {
             sleep(1) // seconds
-            self.val = 1
+            Task { @MainActor in val = 1 }
         }
         
         opQ.isSuspended = false
         let timeoutResult = opQ.waitUntilAllOperationsAreFinished(timeout: 0.5)
         
-        XCTAssertEqual(timeoutResult, .timedOut)
-        XCTAssertEqual(opQ.operationCount, 1)
-        XCTAssertEqual(val, 0)
+        try await Task.sleep(nanoseconds: 200_000_000) // 0.2s
+        
+        #expect(timeoutResult == .timedOut)
+        #expect(opQ.operationCount == 1)
+        #expect(val == 0)
     }
 }

@@ -51,6 +51,8 @@ extension OperationQueueStatus: CustomStringConvertible {
     }
 }
 
+extension OperationQueueStatus: Sendable { }
+
 // MARK: - Convenience Methods
 
 extension OperationQueueStatus {

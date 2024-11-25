@@ -27,4 +27,6 @@ extension BasicOperationQueue {
     }
 }
 
+extension BasicOperationQueue.ProgressWeight: Sendable { }
+
 #endif

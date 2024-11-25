@@ -276,7 +276,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
     }
     
     /// Test a `AtomicBlockOperation` that enqueues multiple `AtomicBlockOperation`s and ensure data mutability works as expected.
-    func testNested() {
+    func testNested() async {
         let mainOp = AtomicBlockOperation(
             type: .concurrentAutomatic,
             initialMutableValue: [Int: [Int]]()
@@ -284,7 +284,15 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
-        var mainVal: [Int: [Int]] = [:]
+        final actor Val: Sendable {
+            var value: [Int: [Int]] = [:]
+            
+            func update(_ newValue: [Int: [Int]]) {
+                value = newValue
+            }
+        }
+        
+        let mainVal = Val()
         
         for keyNum in 1 ... 10 {
             mainOp.addOperation { v in
@@ -308,9 +316,9 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             }
         }
         
-        mainOp.setCompletionBlock { v in
-            v.withValue { value in
-                mainVal = value
+        mainOp.setCompletionBlock { [mainVal] v in
+            v.withValue { [mainVal] value in
+                Task { [value] in await mainVal.update(value) }
             }
             
             completionBlockExp.fulfill()
@@ -318,19 +326,20 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         
         mainOp.start()
         
-        wait(for: [completionBlockExp], timeout: 5)
+        await fulfillment(of: [completionBlockExp], timeout: 5)
         
         // state
         XCTAssertTrue(mainOp.isFinished)
         XCTAssertFalse(mainOp.isCancelled)
         XCTAssertFalse(mainOp.isExecuting)
         
-        XCTAssertEqual(mainVal.count, 10)
-        XCTAssertEqual(mainVal.keys.sorted(), Array(1 ... 10))
-        XCTAssert(mainVal.values.allSatisfy { $0.sorted() == Array(1 ... 200) })
+        let value = await mainVal.value
+        XCTAssertEqual(value.count, 10)
+        XCTAssertEqual(value.keys.sorted(), Array(1 ... 10))
+        XCTAssert(value.values.allSatisfy { $0.sorted() == Array(1 ... 200) })
     }
     
-    func testNested_Cancel() {
+    func testNested_Cancel() async {
         let mainOp = AtomicBlockOperation(
             type: .concurrentAutomatic,
             initialMutableValue: [Int: [Int]]()
@@ -338,7 +347,15 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         
         let completionBlockExp = expectation(description: "Completion Block Called")
         
-        var mainVal: [Int: [Int]] = [:]
+        final actor Val: Sendable {
+            var value: [Int: [Int]] = [:]
+            
+            func update(_ newValue: [Int: [Int]]) {
+                value = newValue
+            }
+        }
+        
+        let mainVal = Val()
         
         for keyNum in 1 ... 10 {
             let subOp = AtomicBlockOperation(
@@ -367,9 +384,9 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             mainOp.addOperation(subOp)
         }
         
-        mainOp.setCompletionBlock { v in
-            v.withValue { value in
-                mainVal = value
+        mainOp.setCompletionBlock { [mainVal] v in
+            v.withValue { [mainVal] value in
+                Task { [value] in await mainVal.update(value) }
             }
             
             completionBlockExp.fulfill()
@@ -384,7 +401,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         usleep(100_000)
         mainOp.cancel()
         
-        wait(for: [completionBlockExp], timeout: 1)
+        await fulfillment(of: [completionBlockExp], timeout: 1)
         
         // XCTAssertEqual(mainOp.operationQueue.operationCount, 0)
         
@@ -399,14 +416,15 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         let expectedArray = (1 ... 10).reduce(into: [Int: [Int]]()) {
             $0[$1] = Array(1 ... 200)
         }
-        XCTAssertNotEqual(mainVal, expectedArray)
+        let value = await mainVal.value
+        XCTAssertNotEqual(value, expectedArray)
     }
     
     /// Ensure that nested progress objects successfully result in the topmost queue calling statusHandler at every increment of all progress children at every level.
-    func testProgress() {
+    func testProgress() async {
         // TODO: This test is flakey. Sometimes it succeeds and sometimes it fails, randomly. Perhaps points to issues with the code and not the test.
         
-        class AtomicOperationQueueProgressTest {
+        @MainActor final class AtomicOperationQueueProgressTest: Sendable {
             var statuses: [OperationQueueStatus] = []
             
             let mainOp = AtomicOperationQueue(
@@ -418,7 +436,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             )
             
             init() {
-                mainOp.statusHandler = { newStatus, oldStatus in
+                mainOp.statusHandler = { [self] newStatus, oldStatus in
                     if self.statuses.isEmpty {
                         self.statuses.append(oldStatus)
                         print("-", oldStatus)
@@ -429,9 +447,9 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             }
         }
         
-        let qTest = AtomicOperationQueueProgressTest()
+        let qTest = await AtomicOperationQueueProgressTest()
         
-        func runTest() {
+        @Sendable func runTest(qTest: AtomicOperationQueueProgressTest) {
             // 5 ops, each with 2 ops, each with 2 units of progress.
             // should equate to 20 total main progress updates 5% apart
             for _ in 1 ... 5 {
@@ -455,21 +473,20 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             }
             
             qTest.mainOp.isSuspended = false
-            
-            wait(for: qTest.mainOp.status, equals: .idle, timeout: 5.0)
         }
         
         let runExp = expectation(description: "Test Run")
         DispatchQueue.global().async {
-            runTest()
+            runTest(qTest: qTest)
             runExp.fulfill()
         }
-        wait(for: [runExp], timeout: 8.0)
+        wait(for: qTest.mainOp.status, equals: .idle, timeout: 5.0)
+        await fulfillment(of: [runExp], timeout: 8.0)
         
         // remove sequential duplicates in order to test, since operations
         // completing will trigger a statusHandler callback when labels
         // change even if progress percentage has not changed
-        let reducedStatusFC = qTest.statuses
+        let reducedStatusFC = await qTest.statuses
             .convertedToTestableFractionCompleted()
             .removingSequentialDuplicates()
         
@@ -508,7 +525,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
         // remove sequential duplicates in order to test, since operations
         // completing will trigger a statusHandler callback when labels
         // change even if progress percentage has not changed
-        let reducedStatusDesc = qTest.statuses
+        let reducedStatusDesc = await qTest.statuses
             .convertedToTestableDescription()
             .removingSequentialDuplicates()
         

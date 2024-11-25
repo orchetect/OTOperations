@@ -10,8 +10,8 @@ import Foundation
 
 extension AtomicOperationQueue {
     /// Proxy object providing mutation access to a thread-safe atomic variable.
-    public class VariableAccess {
-        private /* weak */ var operationQueue: AtomicOperationQueue<T>
+    public final class VariableAccess {
+        private /* weak var */ let operationQueue: AtomicOperationQueue<T>
         
         internal init(operationQueue: AtomicOperationQueue<T>) {
             self.operationQueue = operationQueue
@@ -27,5 +27,7 @@ extension AtomicOperationQueue {
         }
     }
 }
+
+extension AtomicOperationQueue.VariableAccess: Sendable { }
 
 #endif

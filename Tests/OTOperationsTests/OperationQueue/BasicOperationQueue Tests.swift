@@ -131,9 +131,9 @@ final class BasicOperationQueue_Tests: XCTestCase {
         wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 0.5)
     }
     
-    func testResetProgressWhenFinished_True() {
-        class AtomicOperationQueueProgressTest {
-            var statuses: [OperationQueueStatus] = []
+    func testResetProgressWhenFinished_True() async {
+        final actor AtomicOperationQueueProgressTest: Sendable {
+            @MainActor var statuses: [OperationQueueStatus] = []
             
             let opQ = AtomicOperationQueue(
                 type: .serialFIFO,
@@ -145,19 +145,21 @@ final class BasicOperationQueue_Tests: XCTestCase {
                 opQ.labelProgress.label = "Main"
                 
                 opQ.statusHandler = { newStatus, oldStatus in
-                    if self.statuses.isEmpty {
-                        self.statuses.append(oldStatus)
-                        print("-", oldStatus)
+                    Task { @MainActor in
+                        if self.statuses.isEmpty {
+                            self.statuses.append(oldStatus)
+                            print("-", oldStatus)
+                        }
+                        self.statuses.append(newStatus)
+                        print("-", newStatus)
                     }
-                    self.statuses.append(newStatus)
-                    print("-", newStatus)
                 }
             }
         }
         
         let qTest = AtomicOperationQueueProgressTest()
         
-        func runTen() {
+        @Sendable func runTen(qTest: AtomicOperationQueueProgressTest) {
             qTest.opQ.cancelAllOperations()
             
             print("Running 10 operations...")
@@ -211,95 +213,96 @@ final class BasicOperationQueue_Tests: XCTestCase {
                 XCTFail()
             }
             
-            wait(for: qTest.opQ.status, equals: .idle, timeout: 3.0)
-            wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 1.0)
-            wait(for: qTest.opQ.progress.completedUnitCount, equals: 1, timeout: 0.2)
+            XCTestCase().wait(for: qTest.opQ.status, equals: .idle, timeout: 3.0)
+            XCTestCase().wait(for: qTest.opQ.progress.totalUnitCount, equals: 1, timeout: 1.0)
+            XCTestCase().wait(for: qTest.opQ.progress.completedUnitCount, equals: 1, timeout: 0.2)
             XCTAssertFalse(qTest.opQ.progress.isCancelled)
         }
         
         // run this global async, since the statusHandler gets called on main
         let runExp = expectation(description: "Test Run")
-        DispatchQueue.global().async {
-            runTen()
-            self.wait(sec: 0.5)
-            runTen()
+        Task {
+            runTen(qTest: qTest)
+            try await Task.sleep(nanoseconds: 500_000_000) // 500ms
+            runTen(qTest: qTest)
             runExp.fulfill()
         }
-        wait(for: [runExp], timeout: 10.0)
+        await fulfillment(of: [runExp], timeout: 10.0)
         
-        if qTest.statuses.count == 23 {
-            XCTAssertEqual(qTest.statuses[00], .idle)
-            XCTAssertEqual(qTest.statuses[01].inProgressFractionCompleted, 0.0)
-            XCTAssertEqual(qTest.statuses[02].inProgressFractionCompleted, 0.1)
-            XCTAssertEqual(qTest.statuses[03].inProgressFractionCompleted, 0.2)
-            XCTAssertEqual(qTest.statuses[04].inProgressFractionCompleted, 0.3)
-            XCTAssertEqual(qTest.statuses[05].inProgressFractionCompleted, 0.4)
-            XCTAssertEqual(qTest.statuses[06].inProgressFractionCompleted, 0.5)
-            XCTAssertEqual(qTest.statuses[07].inProgressFractionCompleted, 0.6)
-            XCTAssertEqual(qTest.statuses[08].inProgressFractionCompleted, 0.7)
-            XCTAssertEqual(qTest.statuses[09].inProgressFractionCompleted, 0.8)
-            XCTAssertEqual(qTest.statuses[10].inProgressFractionCompleted, 0.9)
-            XCTAssertEqual(qTest.statuses[11], .idle)
-            XCTAssertEqual(qTest.statuses[12].inProgressFractionCompleted, 0.0)
-            XCTAssertEqual(qTest.statuses[13].inProgressFractionCompleted, 0.1)
-            XCTAssertEqual(qTest.statuses[14].inProgressFractionCompleted, 0.2)
-            XCTAssertEqual(qTest.statuses[15].inProgressFractionCompleted, 0.3)
-            XCTAssertEqual(qTest.statuses[16].inProgressFractionCompleted, 0.4)
-            XCTAssertEqual(qTest.statuses[17].inProgressFractionCompleted, 0.5)
-            XCTAssertEqual(qTest.statuses[18].inProgressFractionCompleted, 0.6)
-            XCTAssertEqual(qTest.statuses[19].inProgressFractionCompleted, 0.7)
-            XCTAssertEqual(qTest.statuses[20].inProgressFractionCompleted, 0.8)
-            XCTAssertEqual(qTest.statuses[21].inProgressFractionCompleted, 0.9)
-            XCTAssertEqual(qTest.statuses[22], .idle)
+        if await qTest.statuses.count == 23 {
+            let statuses = await qTest.statuses
+            XCTAssertEqual(statuses[00], .idle)
+            XCTAssertEqual(statuses[01].inProgressFractionCompleted, 0.0)
+            XCTAssertEqual(statuses[02].inProgressFractionCompleted, 0.1)
+            XCTAssertEqual(statuses[03].inProgressFractionCompleted, 0.2)
+            XCTAssertEqual(statuses[04].inProgressFractionCompleted, 0.3)
+            XCTAssertEqual(statuses[05].inProgressFractionCompleted, 0.4)
+            XCTAssertEqual(statuses[06].inProgressFractionCompleted, 0.5)
+            XCTAssertEqual(statuses[07].inProgressFractionCompleted, 0.6)
+            XCTAssertEqual(statuses[08].inProgressFractionCompleted, 0.7)
+            XCTAssertEqual(statuses[09].inProgressFractionCompleted, 0.8)
+            XCTAssertEqual(statuses[10].inProgressFractionCompleted, 0.9)
+            XCTAssertEqual(statuses[11], .idle)
+            XCTAssertEqual(statuses[12].inProgressFractionCompleted, 0.0)
+            XCTAssertEqual(statuses[13].inProgressFractionCompleted, 0.1)
+            XCTAssertEqual(statuses[14].inProgressFractionCompleted, 0.2)
+            XCTAssertEqual(statuses[15].inProgressFractionCompleted, 0.3)
+            XCTAssertEqual(statuses[16].inProgressFractionCompleted, 0.4)
+            XCTAssertEqual(statuses[17].inProgressFractionCompleted, 0.5)
+            XCTAssertEqual(statuses[18].inProgressFractionCompleted, 0.6)
+            XCTAssertEqual(statuses[19].inProgressFractionCompleted, 0.7)
+            XCTAssertEqual(statuses[20].inProgressFractionCompleted, 0.8)
+            XCTAssertEqual(statuses[21].inProgressFractionCompleted, 0.9)
+            XCTAssertEqual(statuses[22], .idle)
             
             //                           [00] .idle
-            XCTAssertEqual(qTest.statuses[01].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[02].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[03].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[04].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[05].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[06].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[07].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[08].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[09].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[10].inProgressLabel, "Main")
-            //                           [11] .idle
-            XCTAssertEqual(qTest.statuses[12].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[13].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[14].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[15].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[16].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[17].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[18].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[19].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[20].inProgressLabel, "Main")
-            XCTAssertEqual(qTest.statuses[21].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[01].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[02].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[03].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[04].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[05].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[06].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[07].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[08].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[09].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[10].inProgressLabel, "Main")
+            //             statuses[11] .idle
+            XCTAssertEqual(statuses[12].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[13].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[14].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[15].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[16].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[17].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[18].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[19].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[20].inProgressLabel, "Main")
+            XCTAssertEqual(statuses[21].inProgressLabel, "Main")
             //                           [22] .idle
             
             // TODO: probably shouldn't test inProgress description since it's brittle;
             // TODO: it uses localizedDescription which may not always be English
             //                           [00] .idle
-            XCTAssertEqual(qTest.statuses[01].inProgressDescription, "0% completed")
-            XCTAssertEqual(qTest.statuses[02].inProgressDescription, "10% completed")
-            XCTAssertEqual(qTest.statuses[03].inProgressDescription, "20% completed")
-            XCTAssertEqual(qTest.statuses[04].inProgressDescription, "30% completed")
-            XCTAssertEqual(qTest.statuses[05].inProgressDescription, "40% completed")
-            XCTAssertEqual(qTest.statuses[06].inProgressDescription, "50% completed")
-            XCTAssertEqual(qTest.statuses[07].inProgressDescription, "60% completed")
-            XCTAssertEqual(qTest.statuses[08].inProgressDescription, "70% completed")
-            XCTAssertEqual(qTest.statuses[09].inProgressDescription, "80% completed")
-            XCTAssertEqual(qTest.statuses[10].inProgressDescription, "90% completed")
+            XCTAssertEqual(statuses[01].inProgressDescription, "0% completed")
+            XCTAssertEqual(statuses[02].inProgressDescription, "10% completed")
+            XCTAssertEqual(statuses[03].inProgressDescription, "20% completed")
+            XCTAssertEqual(statuses[04].inProgressDescription, "30% completed")
+            XCTAssertEqual(statuses[05].inProgressDescription, "40% completed")
+            XCTAssertEqual(statuses[06].inProgressDescription, "50% completed")
+            XCTAssertEqual(statuses[07].inProgressDescription, "60% completed")
+            XCTAssertEqual(statuses[08].inProgressDescription, "70% completed")
+            XCTAssertEqual(statuses[09].inProgressDescription, "80% completed")
+            XCTAssertEqual(statuses[10].inProgressDescription, "90% completed")
             //                           [11] .idle
-            XCTAssertEqual(qTest.statuses[12].inProgressDescription, "0% completed")
-            XCTAssertEqual(qTest.statuses[13].inProgressDescription, "10% completed")
-            XCTAssertEqual(qTest.statuses[14].inProgressDescription, "20% completed")
-            XCTAssertEqual(qTest.statuses[15].inProgressDescription, "30% completed")
-            XCTAssertEqual(qTest.statuses[16].inProgressDescription, "40% completed")
-            XCTAssertEqual(qTest.statuses[17].inProgressDescription, "50% completed")
-            XCTAssertEqual(qTest.statuses[18].inProgressDescription, "60% completed")
-            XCTAssertEqual(qTest.statuses[19].inProgressDescription, "70% completed")
-            XCTAssertEqual(qTest.statuses[20].inProgressDescription, "80% completed")
-            XCTAssertEqual(qTest.statuses[21].inProgressDescription, "90% completed")
+            XCTAssertEqual(statuses[12].inProgressDescription, "0% completed")
+            XCTAssertEqual(statuses[13].inProgressDescription, "10% completed")
+            XCTAssertEqual(statuses[14].inProgressDescription, "20% completed")
+            XCTAssertEqual(statuses[15].inProgressDescription, "30% completed")
+            XCTAssertEqual(statuses[16].inProgressDescription, "40% completed")
+            XCTAssertEqual(statuses[17].inProgressDescription, "50% completed")
+            XCTAssertEqual(statuses[18].inProgressDescription, "60% completed")
+            XCTAssertEqual(statuses[19].inProgressDescription, "70% completed")
+            XCTAssertEqual(statuses[20].inProgressDescription, "80% completed")
+            XCTAssertEqual(statuses[21].inProgressDescription, "90% completed")
             //                           [22] .idle
         } else {
             XCTFail()

@@ -21,4 +21,6 @@ public enum OperationQueueType {
     case concurrent(max: Int)
 }
 
+extension OperationQueueType: Sendable { }
+
 #endif
