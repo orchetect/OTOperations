@@ -480,7 +480,7 @@ final class AtomicBlockOperation_Tests: XCTestCase {
             runTest(qTest: qTest)
             runExp.fulfill()
         }
-        wait(for: qTest.mainOp.status, equals: .idle, timeout: 5.0)
+        await wait(for: qTest.mainOp.status, equals: .idle, timeout: 5.0)
         await fulfillment(of: [runExp], timeout: 8.0)
         
         // remove sequential duplicates in order to test, since operations
